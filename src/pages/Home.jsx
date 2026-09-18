@@ -14,12 +14,10 @@ export default function Home() {
   return (
     <>
       <section className="studio-hero">
-        <p className="crumb">Tanvi Loops / Handmade studio</p>
+        <p className="crumb">Handmade studio</p>
         <p className="eyebrow">Small-batch crochet goods</p>
-        <h1 className="studio-title">
-          Crafted with <span>Care</span>
-        </h1>
-        <p className="studio-sub">Built to Delight</p>
+        <h1 className="studio-title">Tanvi Loops</h1>
+        <p className="studio-sub">Crafted with Care. Built to Delight.</p>
         {photos[0] && (
           <div className="studio-float left">
             <img src={photos[0]} alt="Featured handmade piece" />
