@@ -41,7 +41,7 @@ export default function Layout({ children }) {
             ) : (
               <button className="pill-btn" onClick={() => nav('/signin')}>Sign in</button>
             )}
-            {user && <button className="icon-btn" onClick={signOut} title="Sign out">⎋</button>}
+            {user && <button className="icon-btn" onClick={signOut} title="Sign out">⏍</button>}
             <button className="icon-btn menu-btn" onClick={() => setOpen(true)}>☰</button>
           </div>
         </div>
@@ -67,7 +67,7 @@ export default function Layout({ children }) {
             <p>Handmade with a little extra love.</p>
           </div>
           <div>
-            Questions? hello@tanviloops.com
+            Questions? <a href="mailto:cooltanwee@gmail.com">cooltanwee@gmail.com</a>
             <div>© 2026 Tanvi Loops</div>
           </div>
         </div>
