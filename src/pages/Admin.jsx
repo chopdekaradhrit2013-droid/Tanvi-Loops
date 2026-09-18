@@ -3,8 +3,8 @@ import { CATEGORIES } from '../data/products.js'
 import { useStore } from '../context/StoreContext.jsx'
 
 const empty = {
-  id: '', name: '', price: '', category: 'Bags & Totes', materials: '', colors: '',
-  stock: 1, featured: false, soldOut: false, images: [], description: '',
+  id: '', name: '', price: '', category: 'Plushies', materials: '', colors: '',
+  stock: 1, featured: true, soldOut: false, images: [], description: '',
 }
 
 function readFiles(files) {
@@ -42,19 +42,19 @@ export default function Admin() {
     <section className="page">
       <p className="kicker">Tanvi Loops</p>
       <h1 className="display" style={{ fontSize: 56 }}>Admin Dashboard</h1>
-      <p className="muted">Signed in as {user?.email}. Add pieces with photos and details — the shop starts empty until you publish.</p>
+      <p className="muted">Signed in as {user?.email}. Upload photos and details here — they appear on the shop immediately.</p>
       <div className="admin-stats">
         <div className="stat"><div className="muted">Total products</div><strong>{products.length}</strong></div>
         <div className="stat"><div className="muted">Orders</div><strong>{orders.length}</strong></div>
-        <div className="stat"><div className="muted">Revenue</div><strong>${revenue.toFixed(0)}</strong></div>
+        <div className="stat"><div className="muted">Revenue</div><strong>₹{revenue.toFixed(0)}</strong></div>
         <div className="stat"><div className="muted">Low stock</div><strong>{low.length}</strong></div>
       </div>
       <h2>Add product</h2>
       <form className="form" onSubmit={save}>
         <input placeholder="Product name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-        <input type="number" step="0.01" placeholder="Price" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+        <input type="number" step="1" placeholder="Price in rupees" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
         <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-          {CATEGORIES.filter((c) => c !== 'All Items').map((c) => <option key={c}>{c}</option>)}
+          {CATEGORIES.filter((c) => c !== 'All').map((c) => <option key={c}>{c}</option>)}
         </select>
         <input placeholder="Materials" value={form.materials} onChange={(e) => setForm({ ...form, materials: e.target.value })} />
         <input placeholder="Colors, comma separated" value={form.colors} onChange={(e) => setForm({ ...form, colors: e.target.value })} />
@@ -78,7 +78,7 @@ export default function Admin() {
         {products.map((p) => (
           <tr key={p.id}>
             <td>{p.images?.[0] && <img src={p.images[0]} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 10 }} />}</td>
-            <td>{p.name}</td><td>${p.price}</td><td>{p.soldOut ? 'Sold out' : p.stock}</td>
+            <td>{p.name}</td><td>₹{p.price}</td><td>{p.soldOut ? 'Sold out' : p.stock}</td>
             <td><button className="pill-btn" onClick={() => edit(p)}>Edit</button> <button className="pill-btn" onClick={() => deleteProduct(p.id)}>Delete</button></td>
           </tr>
         ))}
@@ -86,7 +86,7 @@ export default function Admin() {
       <h2 style={{ marginTop: 36 }}>Orders</h2>
       <table className="table"><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>
         {orders.map((o) => (
-          <tr key={o.id}><td>{o.id}</td><td>{o.customer?.name} · {o.email}</td><td>${o.total.toFixed(2)}</td><td>
+          <tr key={o.id}><td>{o.id}</td><td>{o.customer?.name} · {o.email}</td><td>₹{o.total.toFixed(0)}</td><td>
             <select value={o.status} onChange={(e) => updateOrderStatus(o.id, e.target.value)}>{['Pending','Confirmed','Shipped','Delivered','Cancelled'].map((s) => <option key={s}>{s}</option>)}</select>
           </td></tr>
         ))}
