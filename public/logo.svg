@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" fill="none">
+  <path d="M86 86c38-28 92-28 118-8 8 6 10 18 2 24-8 6-20 2-28-6-16-14-52-16-80 4-10 8-24 4-28-8-4-12 4-22 16-6z" fill="#E8B7E4" stroke="#7A4E86" stroke-width="7" stroke-linecap="round"/>
+  <path d="M148 48c8-18 38-18 42 4 2 14-8 20-20 22" fill="#E8B7E4" stroke="#7A4E86" stroke-width="7" stroke-linecap="round"/>
+  <path d="M154 72v148c0 10-8 18-18 18s-18-8-18-18V120" fill="#D7A6E0" stroke="#7A4E86" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M128 118c18 8 40 6 58-8" stroke="#F3C7A4" stroke-width="10" stroke-linecap="round"/>
+  <path d="M136 108h36c6 0 10 6 8 12l-8 20c-2 6-10 8-16 4l-16-10c-8-4-8-14-4-26z" fill="#F6D0B0" stroke="#7A4E86" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="214" cy="168" r="54" fill="#E7D7F6" stroke="#7A4E86" stroke-width="7"/>
+  <path d="M178 168c8-28 28-46 50-50 18 22 22 48 10 70-16 8-38 6-52-8z" fill="#C9E4F4"/>
+  <path d="M198 130c22-8 44 4 54 24-10 22-32 34-54 28-10-16-12-36 0-52z" fill="#F6D0B0"/>
+  <path d="M186 176c16 18 42 22 62 8-6 16-24 28-44 28-16 0-26-14-18-36z" fill="#D7A6E0"/>
+  <path d="M176 168c20-36 56-48 80-28" stroke="#7A4E86" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M184 196c24 16 56 8 70-16" stroke="#7A4E86" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <text x="160" y="300" text-anchor="middle" font-family="Nunito, Manrope, sans-serif" font-size="42" font-weight="700" fill="#E8B7E4" stroke="#7A4E86" stroke-width="1.2">Tanvi Loops</text>
+</svg>

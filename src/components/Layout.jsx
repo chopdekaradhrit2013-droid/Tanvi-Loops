@@ -19,7 +19,7 @@ export default function Layout({ children }) {
       <header className="nav">
         <div className="nav-inner">
           <Link to="/" className="brand">
-            <img className="brand-logo" src="/logo.png" alt="Tanvi Loops" />
+            <img className="brand-logo" src="/logo.svg" alt="Tanvi Loops" />
             Tanvi Loops
           </Link>
           <nav className="nav-links">
@@ -28,14 +28,8 @@ export default function Layout({ children }) {
             ))}
           </nav>
           <div className="nav-actions">
-            <button className="icon-btn" onClick={() => nav('/favourites')} aria-label="Favourites">
-              ♡
-              {favourites.length > 0 && <span className="badge">{favourites.length}</span>}
-            </button>
-            <button className="icon-btn" onClick={() => nav('/cart')} aria-label="Cart">
-              🛒
-              {cartCount > 0 && <span className="badge">{cartCount}</span>}
-            </button>
+            <button className="icon-btn" onClick={() => nav('/favourites')} aria-label="Favourites">♡{favourites.length > 0 && <span className="badge">{favourites.length}</span>}</button>
+            <button className="icon-btn" onClick={() => nav('/cart')} aria-label="Cart">🛒{cartCount > 0 && <span className="badge">{cartCount}</span>}</button>
             {user ? (
               <button className="pill-btn" onClick={() => (user.isAdmin ? nav('/admin') : nav('/orders'))}>{user.name}</button>
             ) : (
@@ -49,7 +43,7 @@ export default function Layout({ children }) {
       {open && (
         <div className="drawer" onClick={() => setOpen(false)}>
           <nav onClick={(e) => e.stopPropagation()}>
-            <div className="brand"><img className="brand-logo" src="/logo.png" alt="" /> Tanvi Loops</div>
+            <div className="brand"><img className="brand-logo" src="/logo.svg" alt="" /> Tanvi Loops</div>
             {links.map(([to, label]) => (
               <Link key={to} to={to} onClick={() => setOpen(false)}>{label}</Link>
             ))}
