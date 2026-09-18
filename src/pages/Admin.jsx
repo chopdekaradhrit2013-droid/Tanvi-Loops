@@ -7,16 +7,20 @@ const empty = {
   stock: 1, featured: true, soldOut: false, images: [], description: '',
 }
 
-function readFiles(files) {
-  return Promise.all(Array.from(files).map((file) => new Promise((resolve) => {
+function readFile(file) {
+  return new Promise((resolve) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result)
     reader.readAsDataURL(file)
-  })))
+  })
+}
+
+function readFiles(files) {
+  return Promise.all(Array.from(files).map(readFile))
 }
 
 export default function Admin() {
-  const { products, orders, upsertProduct, deleteProduct, updateOrderStatus, user } = useStore()
+  const { products, orders, showcase, upsertProduct, deleteProduct, updateOrderStatus, setShowcaseImage, user } = useStore()
   const [form, setForm] = useState(empty)
   const revenue = orders.reduce((s, o) => s + (o.status === 'Cancelled' ? 0 : o.total), 0)
   const low = products.filter((p) => p.stock <= 3)
@@ -24,6 +28,13 @@ export default function Admin() {
   const onImages = async (e) => {
     const urls = await readFiles(e.target.files)
     setForm((f) => ({ ...f, images: [...(f.images || []), ...urls] }))
+    e.target.value = ''
+  }
+  const onShowcase = async (index, e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const url = await readFile(file)
+    setShowcaseImage(index, url)
     e.target.value = ''
   }
   const save = (e) => {
@@ -42,7 +53,28 @@ export default function Admin() {
     <section className="page">
       <p className="kicker">Tanvi Loops</p>
       <h1 className="display" style={{ fontSize: 56 }}>Admin Dashboard</h1>
-      <p className="muted">Signed in as {user?.email}. Upload photos and details here — they appear on the shop immediately.</p>
+      <p className="muted">Signed in as {user?.email}.</p>
+
+      <div className="showcase-admin">
+        <h2>Homepage photos</h2>
+        <p className="muted">Upload exactly these 3 pictures. They appear on the customer homepage (hero + studio strip).</p>
+        <div className="showcase-admin-grid">
+          {[0, 1, 2].map((i) => (
+            <label key={i} className="showcase-slot">
+              {showcase?.[i] ? (
+                <img src={showcase[i]} alt={`Slot ${i + 1}`} />
+              ) : (
+                <span>Photo {i + 1}</span>
+              )}
+              <input type="file" accept="image/*" onChange={(e) => onShowcase(i, e)} />
+              {showcase?.[i] && (
+                <button type="button" className="pill-btn" onClick={(e) => { e.preventDefault(); setShowcaseImage(i, '') }}>Remove</button>
+              )}
+            </label>
+          ))}
+        </div>
+      </div>
+
       <div className="admin-stats">
         <div className="stat"><div className="muted">Total products</div><strong>{products.length}</strong></div>
         <div className="stat"><div className="muted">Orders</div><strong>{orders.length}</strong></div>

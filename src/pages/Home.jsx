@@ -4,13 +4,12 @@ import ProductCard from '../components/ProductCard.jsx'
 import { useStore } from '../context/StoreContext.jsx'
 
 export default function Home() {
-  const { products } = useStore()
+  const { products, showcase } = useStore()
   const nav = useNavigate()
   const [cat, setCat] = useState('All')
   const cats = ['All', 'Plushies', 'Flowers', 'Bags', 'Home']
   const list = products.filter((p) => cat === 'All' || p.category === cat)
-  const heroL = products.find((p) => p.id === 'cuddle-bear-duo') || products[1]
-  const heroR = products.find((p) => p.id === 'holiday-couple') || products[0]
+  const photos = (showcase || []).filter(Boolean)
 
   return (
     <>
@@ -21,18 +20,36 @@ export default function Home() {
           Crafted with <span>Care</span>
         </h1>
         <p className="studio-sub">Built to Delight</p>
-        {heroL && (
+        {photos[0] && (
           <div className="studio-float left">
-            <img src={heroL.images[0]} alt={heroL.name} />
+            <img src={photos[0]} alt="Featured handmade piece" />
           </div>
         )}
-        {heroR && (
+        {photos[1] && (
+          <div className="studio-float mid">
+            <img src={photos[1]} alt="Featured handmade piece" />
+          </div>
+        )}
+        {photos[2] && (
           <div className="studio-float right">
-            <img src={heroR.images[0]} alt={heroR.name} />
+            <img src={photos[2]} alt="Featured handmade piece" />
           </div>
         )}
         <button className="ghost-btn" onClick={() => nav('/shop')}>Explore the collection →</button>
       </section>
+
+      {photos.length > 0 && (
+        <section className="page showcase-strip">
+          <p className="eyebrow">From the studio</p>
+          <div className="showcase-grid">
+            {photos.map((src, i) => (
+              <figure key={i} className="showcase-card">
+                <img src={src} alt={`Studio piece ${i + 1}`} />
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="page studio-collection">
         <div className="cat-row">
@@ -50,6 +67,7 @@ export default function Home() {
         <div className="grid studio-grid">
           {list.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
+        {list.length === 0 && <p className="muted" style={{ textAlign: 'center' }}>New pieces will appear here once they are added.</p>}
       </section>
 
       <section className="note-band">

@@ -17,6 +17,11 @@ function load() {
 export function StoreProvider({ children }) {
   const saved = load()
   const [products, setProducts] = useState(saved?.products || SEED)
+  const [showcase, setShowcase] = useState(
+    Array.isArray(saved?.showcase) && saved.showcase.length === 3
+      ? saved.showcase
+      : ['', '', '']
+  )
   const [cart, setCart] = useState(saved?.cart || [])
   const [favourites, setFavourites] = useState(saved?.favourites || [])
   const [user, setUser] = useState(saved?.user || null)
@@ -27,8 +32,8 @@ export function StoreProvider({ children }) {
   const [toast, setToast] = useState(null)
 
   useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify({ products, cart, favourites, user, users, orders }))
-  }, [products, cart, favourites, user, users, orders])
+    localStorage.setItem(KEY, JSON.stringify({ products, showcase, cart, favourites, user, users, orders }))
+  }, [products, showcase, cart, favourites, user, users, orders])
 
   useEffect(() => {
     if (!toast) return
@@ -37,6 +42,14 @@ export function StoreProvider({ children }) {
   }, [toast])
 
   const notify = (message) => setToast(message)
+  const setShowcaseImage = (index, dataUrl) => {
+    setShowcase((prev) => {
+      const next = [...prev]
+      next[index] = dataUrl || ''
+      return next
+    })
+    notify(dataUrl ? 'Homepage photo updated' : 'Homepage photo removed')
+  }
   const addToCart = (product, qty = 1, color) => {
     if (product.soldOut || product.stock <= 0) { notify('This piece is currently sold out'); return }
     setCart((prev) => {
@@ -89,10 +102,10 @@ export function StoreProvider({ children }) {
   const cartItems = cart.map((c) => ({ ...c, product: products.find((p) => p.id === c.id) })).filter((x) => x.product)
   const subtotal = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0)
   const value = useMemo(() => ({
-    products, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast,
+    products, showcase, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast,
     addToCart, updateQty, removeFromCart, toggleFavourite, signUp, signIn, signOut,
-    placeOrder, updateOrderStatus, upsertProduct, deleteProduct, notify,
-  }), [products, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast])
+    placeOrder, updateOrderStatus, upsertProduct, deleteProduct, setShowcaseImage, notify,
+  }), [products, showcase, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast])
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }
 
