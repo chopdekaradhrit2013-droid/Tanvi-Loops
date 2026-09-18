@@ -8,18 +8,21 @@ export default function SignIn() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const nav = useNavigate()
+
   const submit = (e) => {
     e.preventDefault()
     const res = signIn({ email, password })
     if (!res.ok) setError(res.error)
-    else nav('/')
+    else nav(email.toLowerCase() === 'cooltanwee@gmail.com' ? '/admin' : '/')
   }
+
   return (
     <section className="page auth-wrap">
       <div>
         <p className="kicker">welcome</p>
         <h1 className="display" style={{ fontSize: 64 }}>sign in & join us.</h1>
-        <p className="muted">Browse freely. Demo admin: admin@tanviloops.com / admin123</p>
+        <p className="muted">Browse freely. An account is only needed to track orders and keep favourites across devices.</p>
+        <p className="muted">Admin sign-in is required to add products and manage the store.</p>
       </div>
       <form className="form" onSubmit={submit}>
         <input type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />

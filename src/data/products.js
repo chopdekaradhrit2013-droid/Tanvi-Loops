@@ -1,16 +1,10 @@
-export const CATEGORIES = ['All Items', 'Bags & Totes', 'Plushies', 'Flowers & Bouquets', 'Accessories', 'Home Decor']
-
-export const PRODUCTS = [
-  { id: 'heart-tote', name: 'Heart Granny Square Tote', price: 48, category: 'Bags & Totes', materials: '100% cotton yarn', colors: ['Red', 'Blush', 'Cream'], stock: 8, featured: true, soldOut: false, images: ['/products/bag-hearts.jpg'], description: 'A hand-crocheted tote of alternating blush and crimson granny squares, each stitched with a heart.' },
-  { id: 'garden-tote', name: 'Garden Flower Market Bag', price: 52, category: 'Bags & Totes', materials: 'Cotton blend yarn', colors: ['Lime', 'Sky', 'Magenta'], stock: 6, featured: true, soldOut: false, images: ['/products/bag-green-flowers.jpg'], description: 'A rounded market bag of lime granny squares blooming with sky-and-magenta daisies.' },
-  { id: 'scarlet-bloom', name: 'Scarlet Crochet Bloom', price: 22, category: 'Flowers & Bouquets', materials: 'Mercerized cotton', colors: ['Scarlet', 'Gold'], stock: 18, featured: true, soldOut: false, images: ['/products/flower-red.jpg'], description: 'A single everlasting hibiscus in vivid scarlet, finished with a golden centre.' },
-  { id: 'teddy-pair', name: 'Twin Honey Bears', price: 64, category: 'Plushies', materials: 'Soft acrylic yarn, safety eyes, satin ribbon', colors: ['Cocoa', 'Ivory'], stock: 4, featured: true, soldOut: false, images: ['/products/teddy-pair.jpg'], description: 'A pair of seated honey-brown bears with ivory muzzles and satin bows.' },
-  { id: 'holiday-pair', name: 'Mr & Mrs Claus', price: 58, category: 'Plushies', materials: 'Cotton yarn, felt details', colors: ['Crimson', 'Ivory', 'Coal'], stock: 5, featured: false, soldOut: false, images: ['/products/santa-pair.jpg'], description: 'A festive couple stitched by hand for the mantel.' },
-  { id: 'boho-tote', name: 'Boho Crochet Tote Bag', price: 48, category: 'Bags & Totes', materials: '100% cotton yarn', colors: ['Cream', 'Sage', 'Terracotta'], stock: 10, featured: true, soldOut: false, images: ['/products/bag-hearts.jpg', '/products/bag-green-flowers.jpg'], description: 'Dense single-crochet body, terracotta handles, quiet artisan finish.' },
-  { id: 'mini-pouch', name: 'Mini Flower Pouch', price: 22, category: 'Accessories', materials: 'Cotton yarn', colors: ['Cream', 'Blush', 'Terracotta'], stock: 14, featured: false, soldOut: false, images: ['/products/flower-red.jpg'], description: 'A palm-sized pouch finished with a crochet blossom.' },
-  { id: 'coaster-set', name: 'Linen Stitch Coaster Set', price: 28, category: 'Home Decor', materials: 'Cotton yarn', colors: ['Cream', 'Blush', 'Sage'], stock: 12, featured: false, soldOut: false, images: ['/products/flower-red.jpg'], description: 'A set of four coasters in a tight linen stitch.' },
-  { id: 'bucket-hat', name: 'Sun Bucket Hat', price: 36, category: 'Accessories', materials: 'Cotton yarn', colors: ['Cream', 'Sage'], stock: 7, featured: false, soldOut: false, images: ['/products/bag-green-flowers.jpg'], description: 'A breathable bucket hat with a gentle brim.' },
-  { id: 'phone-sleeve', name: 'Crochet Phone Pouch', price: 18, category: 'Accessories', materials: 'Cotton yarn', colors: ['Terracotta', 'Cream'], stock: 16, featured: false, soldOut: false, images: ['/products/bag-hearts.jpg'], description: 'A slim sleeve for a phone, with a loop for a wrist strap.' },
-  { id: 'keychain-bloom', name: 'Bloom Keychain', price: 12, category: 'Accessories', materials: 'Cotton yarn, metal ring', colors: ['Scarlet', 'Blush'], stock: 22, featured: false, soldOut: false, images: ['/products/flower-red.jpg'], description: 'A tiny crochet flower on a brass ring.' },
-  { id: 'cardigan', name: 'Cloudstitch Cardigan', price: 128, category: 'Accessories', materials: 'Merino-cotton blend', colors: ['Ivory', 'Oat'], stock: 3, featured: false, soldOut: false, images: ['/products/teddy-pair.jpg'], description: 'An open cardigan in a slow, even stitch.' },
+export const CATEGORIES = [
+  'All Items',
+  'Bags & Totes',
+  'Plushies',
+  'Flowers & Bouquets',
+  'Accessories',
+  'Home Decor',
 ]
+
+export const PRODUCTS = []
