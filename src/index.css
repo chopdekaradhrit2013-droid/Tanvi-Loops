@@ -47,7 +47,7 @@ img { max-width: 100%; display: block; }
 .card { cursor: pointer; }
 .card-media { background: #efe6d8; border-radius: var(--radius); overflow: hidden; aspect-ratio: 1; position: relative; box-shadow: var(--shadow); transition: transform .4s ease; }
 .card:hover .card-media { transform: translateY(-6px) rotate(-0.6deg); }
-.card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.card-media img { width: 100%; height: 100%; object-fit: cover; }
 .card:hover .card-media img { transform: scale(1.06); }
 .card-body { padding: 14px 6px 0; }
 .card-body h3 { margin: 0 0 4px; font-size: 16px; }
@@ -94,10 +94,13 @@ img { max-width: 100%; display: block; }
   .admin-stats { grid-template-columns: 1fr 1fr; }
   .nav-links { display: none; }
   .menu-btn { display: inline-flex; }
-  .hero-copy { margin-top: 18vh; }
+  .hero { min-height: auto; padding-bottom: 40px; }
+  .hero-copy { margin-top: 22vh; }
   .hero-note, .hero-cats { position: static; margin: 18px auto; text-align: center; }
+  .float-card { width: 120px !important; height: 120px !important; }
 }
 @media (max-width: 640px) {
   .grid { grid-template-columns: 1fr; }
   .page, .nav-inner, .hero { padding-left: 18px; padding-right: 18px; }
+  .float-card { width: 96px !important; height: 96px !important; border-radius: 18px; }
 }
