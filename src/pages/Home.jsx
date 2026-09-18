@@ -5,6 +5,7 @@ import { useStore } from '../context/StoreContext.jsx'
 export default function Home() {
   const { products } = useStore()
   const featured = products.filter((p) => p.featured)
+  const showcase = featured.length ? featured : products
   const nav = useNavigate()
   return (
     <>
@@ -43,7 +44,8 @@ export default function Home() {
           ))}
         </div>
         <div className="grid">
-          {featured.map((p) => <ProductCard key={p.id} product={p} />)}
+          {showcase.map((p) => <ProductCard key={p.id} product={p} />)}
+          {showcase.length === 0 && <p className="muted">New pieces will appear here as soon as they are added.</p>}
         </div>
       </section>
     </>
