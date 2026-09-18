@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { PRODUCTS as SEED } from '../data/products'
 
 const StoreContext = createContext(null)
-const KEY = 'tanvi-loops-store-v2'
+const KEY = 'tanvi-loops-store-v3'
 
 function load() {
   try {
@@ -37,37 +37,19 @@ export function StoreProvider({ children }) {
   }, [toast])
 
   const notify = (message) => setToast(message)
-
   const addToCart = (product, qty = 1, color) => {
-    if (product.soldOut || product.stock <= 0) {
-      notify('This piece is currently sold out')
-      return
-    }
+    if (product.soldOut || product.stock <= 0) { notify('This piece is currently sold out'); return }
     setCart((prev) => {
       const i = prev.findIndex((x) => x.id === product.id && x.color === color)
-      if (i >= 0) {
-        const next = [...prev]
-        next[i] = { ...next[i], qty: next[i].qty + qty }
-        return next
-      }
+      if (i >= 0) { const next = [...prev]; next[i] = { ...next[i], qty: next[i].qty + qty }; return next }
       return [...prev, { id: product.id, qty, color: color || product.colors?.[0] }]
     })
-    notify('Added to cart')
+    notify('Added to bag')
   }
-
-  const updateQty = (id, color, qty) => {
-    setCart((prev) => prev.map((x) => (x.id === id && x.color === color ? { ...x, qty } : x)).filter((x) => x.qty > 0))
-  }
+  const updateQty = (id, color, qty) => setCart((prev) => prev.map((x) => (x.id === id && x.color === color ? { ...x, qty } : x)).filter((x) => x.qty > 0))
   const removeFromCart = (id, color) => setCart((prev) => prev.filter((x) => !(x.id === id && x.color === color)))
   const toggleFavourite = (id) => {
-    setFavourites((prev) => {
-      if (prev.includes(id)) {
-        notify('Removed from favourites')
-        return prev.filter((x) => x !== id)
-      }
-      notify('Saved to favourites')
-      return [...prev, id]
-    })
+    setFavourites((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
   }
   const signUp = ({ name, email, password }) => {
     if (users.some((u) => u.email === email)) return { ok: false, error: 'Email already registered' }
@@ -88,18 +70,8 @@ export function StoreProvider({ children }) {
       return { id: c.id, name: p?.name, price: p?.price, qty: c.qty, color: c.color, image: p?.images?.[0] }
     })
     const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0)
-    const shipping = subtotal > 80 ? 0 : 4
-    const order = {
-      id: 'TL-' + Math.random().toString(36).slice(2, 8).toUpperCase(),
-      createdAt: new Date().toISOString(),
-      status: 'Pending',
-      customer: details,
-      items,
-      subtotal,
-      shipping,
-      total: subtotal + shipping,
-      email: user?.email || details.email,
-    }
+    const shipping = subtotal > 2000 ? 0 : 80
+    const order = { id: 'TL-' + Math.random().toString(36).slice(2, 8).toUpperCase(), createdAt: new Date().toISOString(), status: 'Pending', customer: details, items, subtotal, shipping, total: subtotal + shipping, email: user?.email || details.email }
     setOrders((o) => [order, ...o])
     setCart([])
     return order
@@ -108,11 +80,7 @@ export function StoreProvider({ children }) {
   const upsertProduct = (product) => {
     setProducts((prev) => {
       const i = prev.findIndex((p) => p.id === product.id)
-      if (i >= 0) {
-        const next = [...prev]
-        next[i] = product
-        return next
-      }
+      if (i >= 0) { const next = [...prev]; next[i] = product; return next }
       return [product, ...prev]
     })
   }

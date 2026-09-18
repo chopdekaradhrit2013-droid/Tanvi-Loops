@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { StoreProvider } from './context/StoreContext.jsx'
 import './index.css'
+import './studio.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -12,5 +13,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <App />
       </StoreProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 )

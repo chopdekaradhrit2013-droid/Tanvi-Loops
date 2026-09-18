@@ -5,8 +5,7 @@ import { useStore } from '../context/StoreContext.jsx'
 const links = [
   ['/', 'Home'],
   ['/shop', 'Shop'],
-  ['/collections', 'Collections'],
-  ['/about', 'About'],
+  ['/about', 'Our Story'],
   ['/contact', 'Contact'],
 ]
 
@@ -29,13 +28,12 @@ export default function Layout({ children }) {
             ))}
           </nav>
           <div className="nav-actions">
-            <button className="icon-btn" onClick={() => nav('/shop')} aria-label="Search">⌕</button>
             <button className="icon-btn" onClick={() => nav('/favourites')} aria-label="Favourites">
               ♡
               {favourites.length > 0 && <span className="badge">{favourites.length}</span>}
             </button>
             <button className="icon-btn" onClick={() => nav('/cart')} aria-label="Cart">
-              Bag
+              🛒
               {cartCount > 0 && <span className="badge">{cartCount}</span>}
             </button>
             {user ? (
@@ -57,7 +55,6 @@ export default function Layout({ children }) {
             ))}
             <Link to="/cart" onClick={() => setOpen(false)}>Cart</Link>
             <Link to="/favourites" onClick={() => setOpen(false)}>Favourites</Link>
-            <Link to="/orders" onClick={() => setOpen(false)}>Orders</Link>
             {user?.isAdmin && <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>}
           </nav>
         </div>
@@ -66,16 +63,12 @@ export default function Layout({ children }) {
       <footer className="footer">
         <div className="footer-inner">
           <div>
-            <div className="brand"><span className="brand-mark" /> Tanvi Loops</div>
+            <strong>Tanvi Loops</strong>
             <p>Handmade with a little extra love.</p>
           </div>
           <div>
-            <div>Bags · Flowers · Plushies</div>
-            <div>Accessories · Home Decor</div>
-          </div>
-          <div>
-            <Link to="/contact">Contact</Link> · <Link to="/about">Our story</Link>
-            <div>hello@tanviloops.com</div>
+            Questions? hello@tanviloops.com
+            <div>© 2026 Tanvi Loops</div>
           </div>
         </div>
       </footer>
