@@ -34,10 +34,21 @@ export default function AccordionGallery({
   const vertical = orientation === 'vertical'
   const count = items.length
   const [active, setActive] = useState(Math.min(Math.max(defaultIndex, 0), Math.max(count - 1, 0)))
+  const [touchy, setTouchy] = useState(false)
   const prefersReduced =
     typeof window !== 'undefined' && window.matchMedia
       ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
       : false
+
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: none), (pointer: coarse), (max-width: 720px)')
+    const sync = () => setTouchy(mq.matches)
+    sync()
+    mq.addEventListener?.('change', sync)
+    return () => mq.removeEventListener?.('change', sync)
+  }, [])
+
+  const clickOnly = touchy || trigger === 'click'
 
   const applyLayout = useCallback((animate) => {
     const panels = panelRefs.current
@@ -55,16 +66,22 @@ export default function AccordionGallery({
       const bar = barRefs.current[i]
       const text = textRefs.current[i]
       const rot = isActive ? 0 : i < active ? tilt : -tilt
-      const rotProp = vertical ? { rotateX: -rot } : { rotateY: rot }
-      tl.to(panel, { flexGrow: isActive ? grow : 1, ...rotProp, duration: dur, ease }, 0)
+      const rotProp = vertical || touchy ? { rotateX: 0, rotateY: 0 } : { rotateY: rot }
+      tl.to(panel, {
+        flexGrow: isActive ? grow : 1,
+        height: touchy ? (isActive ? 280 : 72) : 'auto',
+        ...rotProp,
+        duration: dur,
+        ease,
+      }, 0)
       if (media) {
         const drift = Math.max(-1.5, Math.min(1.5, active - i))
         const shift = drift * parallax * mediaSize * 0.06
         const gray = grayscale ? (isActive ? 0 : 1) : 0
         tl.to(media, {
           xPercent: -50, yPercent: -50,
-          x: vertical ? 0 : isActive ? 0 : shift,
-          y: vertical ? (isActive ? 0 : shift) : 0,
+          x: vertical || touchy ? 0 : isActive ? 0 : shift,
+          y: 0,
           '--ag-gray': gray, '--ag-dim': isActive ? 0 : 0.35,
           duration: dur, ease,
         }, 0)
@@ -75,7 +92,7 @@ export default function AccordionGallery({
       }
     })
     tlRef.current = tl
-  }, [active, count, expandRatio, duration, ease, vertical, tilt, parallax, grayscale, showLabels, stagger, prefersReduced])
+  }, [active, count, expandRatio, duration, ease, vertical, tilt, parallax, grayscale, showLabels, stagger, prefersReduced, touchy])
 
   useEffect(() => {
     const el = rootRef.current
@@ -102,8 +119,11 @@ export default function AccordionGallery({
 
   useEffect(() => () => { tlRef.current?.kill() }, [])
 
-  const handleEnter = (i) => { if (trigger === 'hover') setActive(i) }
-  const handleClick = (i, e) => { if (i !== active) { e.preventDefault(); setActive(i) } }
+  const handleEnter = (i) => { if (!clickOnly) setActive(i) }
+  const handleClick = (i, e) => {
+    e.preventDefault()
+    setActive(i)
+  }
   const handleKeyDown = (i, e) => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); setActive((i + 1) % count) }
     else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); setActive((i - 1 + count) % count) }
@@ -114,14 +134,14 @@ export default function AccordionGallery({
   return (
     <div
       ref={rootRef}
-      className={`accordion-gallery${vertical ? ' accordion-gallery--vertical' : ''}${className ? ` ${className}` : ''}`}
+      className={`accordion-gallery${vertical ? ' accordion-gallery--vertical' : ''}${touchy ? ' accordion-gallery--touch' : ''}${className ? ` ${className}` : ''}`}
       style={{
         '--ag-accent': accentColor,
         '--ag-overlay': overlayColor,
         '--ag-text': textColor,
         '--ag-gap': `${gap}px`,
         '--ag-radius': `${radius}px`,
-        height: vertical ? `${Math.round(height * 1.6)}px` : `${height}px`,
+        height: touchy ? 'auto' : vertical ? `${Math.round(height * 1.6)}px` : `${height}px`,
       }}
       role="list"
       aria-label="Image accordion gallery"
