@@ -20,7 +20,7 @@ function readFiles(files) {
 }
 
 export default function Admin() {
-  const { products, orders, showcase, upsertProduct, deleteProduct, updateOrderStatus, setShowcaseImage, user, supabaseEnabled, cloudReady } = useStore()
+  const { products, orders, showcase, upsertProduct, deleteProduct, updateOrderStatus, addGalleryImages, removeGalleryImage, user, supabaseEnabled, cloudReady } = useStore()
   const [form, setForm] = useState(empty)
   const revenue = orders.reduce((s, o) => s + (o.status === 'Cancelled' ? 0 : o.total), 0)
   const low = products.filter((p) => p.stock <= 3)
@@ -30,11 +30,11 @@ export default function Admin() {
     setForm((f) => ({ ...f, images: [...(f.images || []), ...urls] }))
     e.target.value = ''
   }
-  const onShowcase = async (index, e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const url = await readFile(file)
-    await setShowcaseImage(index, url)
+  const onGallery = async (e) => {
+    const files = e.target.files
+    if (!files?.length) return
+    const urls = await readFiles(files)
+    await addGalleryImages(urls)
     e.target.value = ''
   }
   const save = async (e) => {
@@ -54,24 +54,26 @@ export default function Admin() {
       <p className="kicker">Tanvi Loops</p>
       <h1 className="display" style={{ fontSize: 56 }}>Admin Dashboard</h1>
       <p className="muted">Signed in as {user?.email}.</p>
-      <p className={supabaseEnabled ? 'muted' : 'muted'} style={{ color: supabaseEnabled ? '#2f6b3f' : '#8a4b1f' }}>
-        {supabaseEnabled ? (cloudReady ? 'Supabase connected — uploads sync to every customer.' : 'Connecting to Supabase…') : 'Supabase keys are missing. Follow SETUP-SUPABASE.md so customers can see uploads.'}
+      <p className="muted" style={{ color: supabaseEnabled ? '#2f6b3f' : '#8a4b1f' }}>
+        {supabaseEnabled ? (cloudReady ? 'Supabase connected — uploads sync to every customer.' : 'Connecting to Supabase…') : 'Supabase keys are missing.'}
       </p>
 
       <div className="showcase-admin">
-        <h2>Homepage photos</h2>
-        <p className="muted">Upload these 3 pictures. They appear on the customer homepage for everyone.</p>
-        <div className="showcase-admin-grid">
-          {[0, 1, 2].map((i) => (
-            <label key={i} className="showcase-slot">
-              {showcase?.[i] ? <img src={showcase[i]} alt={`Slot ${i + 1}`} /> : <span>Photo {i + 1}</span>}
-              <input type="file" accept="image/*" onChange={(e) => onShowcase(i, e)} />
-              {showcase?.[i] && (
-                <button type="button" className="pill-btn" onClick={(e) => { e.preventDefault(); setShowcaseImage(i, '') }}>Remove</button>
-              )}
-            </label>
+        <h2>Landing page gallery</h2>
+        <p className="muted">Upload as many photos as you want. They appear in the customer homepage gallery. The first three also float in the hero.</p>
+        <label className="showcase-slot" style={{ minHeight: 88 }}>
+          <span>Add photos</span>
+          <input type="file" accept="image/*" multiple onChange={onGallery} />
+        </label>
+        <div className="showcase-admin-grid" style={{ marginTop: 16 }}>
+          {(showcase || []).map((src, i) => (
+            <div key={src + i} className="showcase-slot">
+              <img src={src} alt={`Gallery ${i + 1}`} />
+              <button type="button" className="pill-btn" onClick={() => removeGalleryImage(i)}>Remove</button>
+            </div>
           ))}
         </div>
+        {!showcase?.length && <p className="muted">No gallery photos yet.</p>}
       </div>
 
       <div className="admin-stats">

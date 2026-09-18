@@ -3,7 +3,7 @@ import { PRODUCTS as SEED } from '../data/products'
 import { mapProduct, supabase, supabaseEnabled, toRow, uploadDataUrl } from '../lib/supabase'
 
 const StoreContext = createContext(null)
-const KEY = 'tanvi-loops-store-v6'
+const KEY = 'tanvi-loops-store-v7'
 
 function load() {
   try {
@@ -15,12 +15,19 @@ function load() {
   }
 }
 
+async function persistGallery(urls) {
+  if (!supabaseEnabled) return
+  const rows = urls.map((image_url, slot) => ({ slot, image_url }))
+  if (rows.length) await supabase.from('showcase').upsert(rows)
+  const { data } = await supabase.from('showcase').select('slot')
+  const extra = (data || []).filter((r) => r.slot >= urls.length).map((r) => r.slot)
+  if (extra.length) await supabase.from('showcase').delete().in('slot', extra)
+}
+
 export function StoreProvider({ children }) {
   const saved = load()
   const [products, setProducts] = useState(saved?.products || SEED)
-  const [showcase, setShowcase] = useState(
-    Array.isArray(saved?.showcase) && saved.showcase.length === 3 ? saved.showcase : ['', '', '']
-  )
+  const [showcase, setShowcase] = useState(Array.isArray(saved?.showcase) ? saved.showcase.filter(Boolean) : [])
   const [cart, setCart] = useState(saved?.cart || [])
   const [favourites, setFavourites] = useState(saved?.favourites || [])
   const [user, setUser] = useState(saved?.user || null)
@@ -52,11 +59,7 @@ export function StoreProvider({ children }) {
       ])
       if (!alive) return
       if (productRows) setProducts(productRows.map(mapProduct))
-      if (showRows) {
-        const next = ['', '', '']
-        showRows.forEach((r) => { if (r.slot >= 0 && r.slot < 3) next[r.slot] = r.image_url || '' })
-        setShowcase(next)
-      }
+      if (showRows) setShowcase(showRows.map((r) => r.image_url).filter(Boolean))
       if (orderRows) {
         setOrders(orderRows.map((o) => ({
           id: o.id,
@@ -83,30 +86,30 @@ export function StoreProvider({ children }) {
 
   const notify = (message) => setToast(message)
 
-  const setShowcaseImage = async (index, dataUrl) => {
-    let url = dataUrl || ''
+  const addGalleryImages = async (dataUrls) => {
     try {
-      if (url) url = await uploadDataUrl(url, 'showcase')
+      const uploaded = await Promise.all(dataUrls.map((url) => uploadDataUrl(url, 'showcase')))
+      const next = [...showcase, ...uploaded.filter(Boolean)]
+      setShowcase(next)
+      await persistGallery(next)
+      notify('Gallery photos added')
     } catch (err) {
-      notify(err.message || 'Could not upload photo')
-      return
+      notify(err.message || 'Could not upload gallery photos')
     }
-    setShowcase((prev) => {
-      const next = [...prev]
-      next[index] = url
-      return next
-    })
-    if (supabaseEnabled) {
-      await supabase.from('showcase').upsert({ slot: index, image_url: url })
-    }
-    notify(url ? 'Homepage photo updated for all customers' : 'Homepage photo removed')
+  }
+
+  const removeGalleryImage = async (index) => {
+    const next = showcase.filter((_, i) => i !== index)
+    setShowcase(next)
+    await persistGallery(next)
+    notify('Photo removed from gallery')
   }
 
   const addToCart = (product, qty = 1, color) => {
     if (product.soldOut || product.stock <= 0) { notify('This piece is currently sold out'); return }
     setCart((prev) => {
       const i = prev.findIndex((x) => x.id === product.id && x.color === color)
-      if (i >= 0) { const next = [...prev]; next[i] = { ...next[i], qty: next[i].qty + qty }; return next }
+      if (i >= 0) { const n = [...prev]; n[i] = { ...n[i], qty: n[i].qty + qty }; return n }
       return [...prev, { id: product.id, qty, color: color || product.colors?.[0] }]
     })
     notify('Added to bag')
@@ -141,14 +144,8 @@ export function StoreProvider({ children }) {
     setCart([])
     if (supabaseEnabled) {
       await supabase.from('orders').insert({
-        id: order.id,
-        status: order.status,
-        customer: order.customer,
-        items: order.items,
-        subtotal: order.subtotal,
-        shipping: order.shipping,
-        total: order.total,
-        email: order.email,
+        id: order.id, status: order.status, customer: order.customer, items: order.items,
+        subtotal: order.subtotal, shipping: order.shipping, total: order.total, email: order.email,
       })
     }
     return order
@@ -184,7 +181,7 @@ export function StoreProvider({ children }) {
     products, showcase, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast,
     cloudReady, supabaseEnabled,
     addToCart, updateQty, removeFromCart, toggleFavourite, signUp, signIn, signOut,
-    placeOrder, updateOrderStatus, upsertProduct, deleteProduct, setShowcaseImage, notify,
+    placeOrder, updateOrderStatus, upsertProduct, deleteProduct, addGalleryImages, removeGalleryImage, notify,
   }), [products, showcase, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast, cloudReady])
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }
