@@ -26,7 +26,7 @@ export default function Product() {
       <div>
         <p className="kicker" style={{ fontSize: 28 }}>{product.category}</p>
         <h1 className="display" style={{ fontSize: 52 }}>{product.name}</h1>
-        <p className="price">${product.price.toFixed(2)}</p>
+        <p className="price">₹{Number(product.price).toFixed(0)}</p>
         <p>{product.description}</p>
         <p className="muted">{product.materials}</p>
         <p>{product.soldOut || product.stock <= 0 ? 'Sold out' : `In stock · ${product.stock} remaining`}</p>
