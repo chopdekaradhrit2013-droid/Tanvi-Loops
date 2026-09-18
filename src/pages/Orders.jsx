@@ -14,7 +14,7 @@ export default function Orders() {
             <div className="muted">{new Date(o.createdAt).toLocaleDateString()} · {o.status}</div>
             <div>{o.items.map((i) => `${i.name} ×${i.qty}`).join(', ')}</div>
           </div>
-          <div>${o.total.toFixed(2)}</div>
+          <div>₹{Number(o.total).toFixed(0)}</div>
         </article>
       ))}
     </section>
