@@ -11,9 +11,6 @@
   margin: 0 auto;
   padding: 1rem 0;
   box-sizing: border-box;
-  --x: 50%;
-  --y: 50%;
-  --r: 220px;
 }
 @media (max-width: 1124px) {
   .chroma-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
@@ -77,22 +74,4 @@
 .chroma-info .name { margin: 0; font-size: 16px; }
 .chroma-info .role, .chroma-info .handle { color: #ead9c4; font-size: 13px; }
 .chroma-info .handle.sold { color: #ffb4b4; font-weight: 700; }
-.chroma-overlay, .chroma-fade {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 3;
-  backdrop-filter: grayscale(1) brightness(0.78);
-  -webkit-backdrop-filter: grayscale(1) brightness(0.78);
-  background: rgba(0, 0, 0, 0.001);
-}
-.chroma-overlay {
-  mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), transparent 0%, transparent 15%, rgba(0,0,0,.1) 30%, rgba(0,0,0,.22) 45%, rgba(0,0,0,.35) 60%, rgba(0,0,0,.5) 75%, rgba(0,0,0,.68) 88%, white 100%);
-  -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), transparent 0%, transparent 15%, rgba(0,0,0,.1) 30%, rgba(0,0,0,.22) 45%, rgba(0,0,0,.35) 60%, rgba(0,0,0,.5) 75%, rgba(0,0,0,.68) 88%, white 100%);
-}
-.chroma-fade {
-  z-index: 4;
-  mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), white 0%, white 15%, rgba(255,255,255,.9) 30%, rgba(255,255,255,.78) 45%, rgba(255,255,255,.65) 60%, rgba(255,255,255,.5) 75%, rgba(255,255,255,.32) 88%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle var(--r) at var(--x) var(--y), white 0%, white 15%, rgba(255,255,255,.9) 30%, rgba(255,255,255,.78) 45%, rgba(255,255,255,.65) 60%, rgba(255,255,255,.5) 75%, rgba(255,255,255,.32) 88%, transparent 100%);
-  opacity: 1;
-}
+.chroma-overlay, .chroma-fade { display: none; }
