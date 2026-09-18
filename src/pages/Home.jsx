@@ -8,13 +8,12 @@ import { useStore } from '../context/StoreContext.jsx'
 const LABELS = ['Ruby Bloom', 'Cuddle Bears', 'Heart Tote']
 
 export default function Home() {
-  const { products, showcase, collection } = useStore()
+  const { products, showcase } = useStore()
   const nav = useNavigate()
   const [cat, setCat] = useState('All')
   const cats = ['All', 'Plushies', 'Flowers', 'Bags', 'Home']
   const list = products.filter((p) => cat === 'All' || p.category === cat)
   const photos = (showcase || []).filter(Boolean)
-  const collectionPhotos = (collection || []).filter(Boolean)
   const galleryItems = photos.map((image, i) => ({
     image,
     label: LABELS[i] || `Piece ${i + 1}`,
@@ -83,22 +82,11 @@ export default function Home() {
           </div>
           <p className="muted">Thoughtful crochet pieces for gifting, collecting, and making everyday corners feel warmer.</p>
         </div>
-        {collectionPhotos.length > 0 && (
-          <div className="grid studio-grid" style={{ marginBottom: 28 }}>
-            {collectionPhotos.map((src, i) => (
-              <article key={src + i} className="card studio-card">
-                <div className="card-media">
-                  <img src={src} alt={`Collection ${i + 1}`} />
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
         <div className="grid studio-grid">
           {list.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
-        {list.length === 0 && collectionPhotos.length === 0 && (
-          <p className="muted" style={{ textAlign: 'center' }}>New pieces will appear here once they are added.</p>
+        {list.length === 0 && (
+          <p className="muted" style={{ textAlign: 'center' }}>New pieces will appear here once a product is added.</p>
         )}
       </section>
 

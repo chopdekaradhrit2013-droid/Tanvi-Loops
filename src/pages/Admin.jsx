@@ -43,8 +43,8 @@ function PhotoSection({ title, help, photos, onAdd, onRemove }) {
 
 export default function Admin() {
   const {
-    products, orders, showcase, collection, upsertProduct, deleteProduct, updateOrderStatus,
-    addGalleryImages, removeGalleryImage, addCollectionImages, removeCollectionImage,
+    products, orders, showcase, upsertProduct, deleteProduct, updateOrderStatus,
+    addGalleryImages, removeGalleryImage,
     user, supabaseEnabled, cloudReady,
   } = useStore()
   const [form, setForm] = useState(empty)
@@ -78,8 +78,28 @@ export default function Admin() {
         {supabaseEnabled ? (cloudReady ? 'Supabase connected — uploads sync to every customer.' : 'Connecting to Supabase…') : 'Supabase keys are missing.'}
       </p>
 
-      <PhotoSection title="Landing page gallery" help="These photos appear in the homepage accordion and the first three float in the hero." photos={showcase} onAdd={addGalleryImages} onRemove={removeGalleryImage} />
-      <PhotoSection title="Collection" help="These photos appear in the Collection section on the homepage." photos={collection} onAdd={addCollectionImages} onRemove={removeCollectionImage} />
+      <PhotoSection
+        title="Landing page gallery"
+        help="Only photos you upload here appear in the homepage accordion and hero. Products do not show up here."
+        photos={showcase}
+        onAdd={addGalleryImages}
+        onRemove={removeGalleryImage}
+      />
+
+      <div className="showcase-admin">
+        <h2>Collection</h2>
+        <p className="muted">Collection is filled automatically from products. Add a product below and it appears in Collection for customers. Uploading here is not needed.</p>
+        {products.length === 0 ? <p className="muted">No products yet — Collection is empty.</p> : (
+          <div className="showcase-admin-grid">
+            {products.map((p) => (
+              <div key={p.id} className="showcase-slot">
+                {p.images?.[0] && <img src={p.images[0]} alt={p.name} />}
+                <span>{p.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="admin-stats">
         <div className="stat"><div className="muted">Total products</div><strong>{products.length}</strong></div>
