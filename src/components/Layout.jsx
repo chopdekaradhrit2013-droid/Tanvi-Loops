@@ -29,7 +29,6 @@ export default function Layout({ children }) {
         animationDuration={0.5}
         staggerDelay={0.1}
       />
-      <GradualBlur target="page" position="top" height="5.5rem" strength={2} divCount={5} curve="bezier" exponential opacity={1} zIndex={30} />
       <main className="site-with-bubbles">{children}</main>
       <GradualBlur target="page" position="bottom" height="5.5rem" strength={2} divCount={5} curve="bezier" exponential opacity={1} zIndex={30} />
       {user && (
