@@ -1,59 +1,44 @@
-import { useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext.jsx'
-
-const links = [
-  ['/', 'Home'],
-  ['/shop', 'Shop'],
-  ['/about', 'Our Story'],
-  ['/contact', 'Contact'],
-]
+import BubbleMenu from './BubbleMenu.jsx'
 
 export default function Layout({ children }) {
-  const { cartCount, favourites, user, toast, signOut } = useStore()
-  const [open, setOpen] = useState(false)
+  const { user, toast, signOut } = useStore()
   const nav = useNavigate()
+  const items = [
+    { label: 'home', href: '/', ariaLabel: 'Home', rotation: -8, hoverStyles: { bgColor: '#8a4b1f', textColor: '#fff' } },
+    { label: 'shop', href: '/shop', ariaLabel: 'Shop', rotation: 8, hoverStyles: { bgColor: '#9a3a45', textColor: '#fff' } },
+    { label: 'story', href: '/about', ariaLabel: 'Our Story', rotation: -6, hoverStyles: { bgColor: '#6b7a6a', textColor: '#fff' } },
+    { label: 'cart', href: '/cart', ariaLabel: 'Cart', rotation: 8, hoverStyles: { bgColor: '#c45c2c', textColor: '#fff' } },
+    { label: 'saved', href: '/favourites', ariaLabel: 'Favourites', rotation: -8, hoverStyles: { bgColor: '#5c3014', textColor: '#fff' } },
+    { label: 'contact', href: '/contact', ariaLabel: 'Contact', rotation: 6, hoverStyles: { bgColor: '#8a4b1f', textColor: '#fff' } },
+    { label: user ? (user.isAdmin ? 'admin' : 'orders') : 'sign in', href: user ? (user.isAdmin ? '/admin' : '/orders') : '/signin', ariaLabel: user ? 'Account' : 'Sign in', rotation: -4, hoverStyles: { bgColor: '#2b241c', textColor: '#fff' } },
+  ]
 
   return (
     <>
-      <header className="nav">
-        <div className="nav-inner">
-          <Link to="/" className="brand">
-            <img className="brand-logo" src="/logo.svg" alt="Tanvi Loops" />
-            Tanvi Loops
-          </Link>
-          <nav className="nav-links">
-            {links.map(([to, label]) => (
-              <NavLink key={to} to={to} end={to === '/'}>{label}</NavLink>
-            ))}
-          </nav>
-          <div className="nav-actions">
-            <button className="icon-btn" onClick={() => nav('/favourites')} aria-label="Favourites">♡{favourites.length > 0 && <span className="badge">{favourites.length}</span>}</button>
-            <button className="icon-btn" onClick={() => nav('/cart')} aria-label="Cart">🛒{cartCount > 0 && <span className="badge">{cartCount}</span>}</button>
-            {user ? (
-              <button className="pill-btn" onClick={() => (user.isAdmin ? nav('/admin') : nav('/orders'))}>{user.name}</button>
-            ) : (
-              <button className="pill-btn" onClick={() => nav('/signin')}>Sign in</button>
-            )}
-            {user && <button className="icon-btn" onClick={signOut} title="Sign out">⏍</button>}
-            <button className="icon-btn menu-btn" onClick={() => setOpen(true)}>☰</button>
-          </div>
-        </div>
-      </header>
-      {open && (
-        <div className="drawer" onClick={() => setOpen(false)}>
-          <nav onClick={(e) => e.stopPropagation()}>
-            <div className="brand"><img className="brand-logo" src="/logo.svg" alt="" /> Tanvi Loops</div>
-            {links.map(([to, label]) => (
-              <Link key={to} to={to} onClick={() => setOpen(false)}>{label}</Link>
-            ))}
-            <Link to="/cart" onClick={() => setOpen(false)}>Cart</Link>
-            <Link to="/favourites" onClick={() => setOpen(false)}>Favourites</Link>
-            {user?.isAdmin && <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>}
-          </nav>
-        </div>
+      <BubbleMenu
+        logo={
+          <>
+            <img src="/logo.svg" alt="" className="bubble-logo" />
+            <span>Tanvi Loops</span>
+          </>
+        }
+        items={items}
+        menuAriaLabel="Toggle navigation"
+        menuBg="#fff8ef"
+        menuContentColor="#2b241c"
+        useFixedPosition
+        animationEase="back.out(1.5)"
+        animationDuration={0.5}
+        staggerDelay={0.1}
+      />
+      <main className="site-with-bubbles">{children}</main>
+      {user && (
+        <button className="pill-btn" style={{ position: 'fixed', right: 18, bottom: 18, zIndex: 40 }} onClick={() => { signOut(); nav('/') }}>
+          Sign out
+        </button>
       )}
-      <main>{children}</main>
       <footer className="footer">
         <div className="footer-inner">
           <div>
