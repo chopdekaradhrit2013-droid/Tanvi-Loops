@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard.jsx'
+import ParticleText from '../components/ParticleText.jsx'
 import { useStore } from '../context/StoreContext.jsx'
 
 export default function Home() {
@@ -16,7 +17,26 @@ export default function Home() {
       <section className="studio-hero">
         <p className="crumb">Handmade studio</p>
         <p className="eyebrow">Small-batch crochet goods</p>
-        <h1 className="studio-title">Tanvi Loops</h1>
+        <div className="hero-title-wrap">
+          <ParticleText
+            text="Tanvi Loops"
+            particleSize={2}
+            density={4}
+            color="#2b241c"
+            highlightColor="#8a4b1f"
+            scatter={180}
+            gatherDuration={1600}
+            stagger={420}
+            pointerRepel={40}
+            repelRadius={120}
+            idleDrift={0.7}
+            trigger="hover"
+            fontSize="clamp(3rem, 12vw, 8rem)"
+            fontWeight={800}
+            fontFamily="inherit"
+            glow
+          />
+        </div>
         <p className="studio-sub">Crafted with Care. Built to Delight.</p>
         {photos[0] && (
           <div className="studio-float left">
