@@ -6,6 +6,7 @@ const empty = {
   id: '', name: '', price: '', oldPrice: '', category: 'Plushies', materials: '', colors: '',
   stock: 1, featured: true, soldOut: false, images: [], description: '',
 }
+const TABS = ['Collection', 'Product', 'Display']
 
 function readFiles(files) {
   return Promise.all(Array.from(files).map((file) => new Promise((resolve) => {
@@ -15,47 +16,27 @@ function readFiles(files) {
   })))
 }
 
-function PhotoSection({ title, help, photos, onAdd, onRemove }) {
-  return (
-    <div className="showcase-admin">
-      <h2>{title}</h2>
-      <p className="muted">{help}</p>
-      <label className="showcase-slot" style={{ minHeight: 88 }}>
-        <span>Add photos</span>
-        <input type="file" accept="image/*" multiple onChange={async (e) => {
-          if (!e.target.files?.length) return
-          await onAdd(await readFiles(e.target.files))
-          e.target.value = ''
-        }} />
-      </label>
-      <div className="showcase-admin-grid" style={{ marginTop: 16 }}>
-        {(photos || []).map((src, i) => (
-          <div key={src + i} className="showcase-slot">
-            <img src={src} alt="" />
-            <button type="button" className="pill-btn" onClick={() => onRemove(i)}>Remove</button>
-          </div>
-        ))}
-      </div>
-      {!photos?.length && <p className="muted">No photos yet.</p>}
-    </div>
-  )
-}
-
 export default function Admin() {
   const {
     products, orders, showcase, upsertProduct, deleteProduct, updateOrderStatus,
     addGalleryImages, removeGalleryImage,
     user, supabaseEnabled, cloudReady,
   } = useStore()
+  const [tab, setTab] = useState('Product')
   const [form, setForm] = useState(empty)
   const revenue = orders.reduce((s, o) => s + (o.status === 'Cancelled' ? 0 : o.total), 0)
   const low = products.filter((p) => p.stock <= 3)
-  const edit = (p) => setForm({
-    ...p,
-    colors: Array.isArray(p.colors) ? p.colors.join(', ') : p.colors,
-    images: p.images || [],
-    oldPrice: p.oldPrice || '',
-  })
+
+  const edit = (p) => {
+    setForm({
+      ...p,
+      colors: Array.isArray(p.colors) ? p.colors.join(', ') : p.colors,
+      images: p.images || [],
+      oldPrice: p.oldPrice || '',
+    })
+    setTab('Product')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const save = async (e) => {
     e.preventDefault()
     await upsertProduct({
@@ -69,6 +50,7 @@ export default function Admin() {
     })
     setForm(empty)
   }
+
   return (
     <section className="page">
       <p className="kicker">Tanvi Loops</p>
@@ -78,84 +60,121 @@ export default function Admin() {
         {supabaseEnabled ? (cloudReady ? 'Supabase connected — uploads sync to every customer.' : 'Connecting to Supabase…') : 'Supabase keys are missing.'}
       </p>
 
-      <PhotoSection
-        title="Landing page gallery"
-        help="Only photos you upload here appear in the homepage accordion and hero. Products do not show up here."
-        photos={showcase}
-        onAdd={addGalleryImages}
-        onRemove={removeGalleryImage}
-      />
-
-      <div className="showcase-admin">
-        <h2>Collection</h2>
-        <p className="muted">Collection is filled automatically from products. Add a product below and it appears in Collection for customers. Uploading here is not needed.</p>
-        {products.length === 0 ? <p className="muted">No products yet — Collection is empty.</p> : (
-          <div className="showcase-admin-grid">
-            {products.map((p) => (
-              <div key={p.id} className="showcase-slot">
-                {p.images?.[0] && <img src={p.images[0]} alt={p.name} />}
-                <span>{p.name}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       <div className="admin-stats">
         <div className="stat"><div className="muted">Total products</div><strong>{products.length}</strong></div>
         <div className="stat"><div className="muted">Orders</div><strong>{orders.length}</strong></div>
         <div className="stat"><div className="muted">Revenue</div><strong>₹{revenue.toFixed(0)}</strong></div>
         <div className="stat"><div className="muted">Low stock</div><strong>{low.length}</strong></div>
       </div>
-      <h2>Add product</h2>
-      <form className="form" onSubmit={save}>
-        <input placeholder="Product name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-        <input type="number" step="1" placeholder="New price in rupees (e.g. 799)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
-        <input type="number" step="1" placeholder="Old price to slash (e.g. 999) — optional" value={form.oldPrice} onChange={(e) => setForm({ ...form, oldPrice: e.target.value })} />
-        <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-          {CATEGORIES.filter((c) => c !== 'All').map((c) => <option key={c}>{c}</option>)}
-        </select>
-        <input placeholder="Materials" value={form.materials} onChange={(e) => setForm({ ...form, materials: e.target.value })} />
-        <input placeholder="Colors, comma separated" value={form.colors} onChange={(e) => setForm({ ...form, colors: e.target.value })} />
-        <input type="number" placeholder="Stock" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
-        <label className="muted">Product photos<input type="file" accept="image/*" multiple onChange={async (e) => {
-          const urls = await readFiles(e.target.files)
-          setForm((f) => ({ ...f, images: [...(f.images || []), ...urls] }))
-          e.target.value = ''
-        }} /></label>
-        {form.images?.length > 0 && (
-          <div className="thumbs">
-            {form.images.map((src, i) => (
-              <img key={i} src={src} alt="" className="on" onClick={() => setForm({ ...form, images: form.images.filter((_, idx) => idx !== i) })} title="Click to remove" />
+
+      <div className="admin-tabs" role="tablist">
+        {TABS.map((name) => (
+          <button key={name} type="button" className={'admin-tab' + (tab === name ? ' on' : '')} onClick={() => setTab(name)}>
+            {name}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'Collection' && (
+        <div className="showcase-admin">
+          <h2>Collection</h2>
+          <p className="muted">This list is filled automatically from products. Edit a product in the Product tab and it updates here and on the customer homepage.</p>
+          {products.length === 0 ? <p className="muted">No products yet — Collection is empty.</p> : (
+            <div className="showcase-admin-grid">
+              {products.map((p) => (
+                <div key={p.id} className="showcase-slot" onClick={() => edit(p)}>
+                  {p.images?.[0] && <img src={p.images[0]} alt={p.name} />}
+                  <strong>{p.name}</strong>
+                  <span className={p.soldOut || p.stock <= 0 ? 'sold-text' : 'muted'}>
+                    {p.soldOut || p.stock <= 0 ? 'Sold out' : `₹${p.price}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'Product' && (
+        <>
+          <h2>{form.id ? 'Edit product' : 'Add product'}</h2>
+          <form className="form" onSubmit={save}>
+            <input placeholder="Product name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+            <input type="number" step="1" placeholder="New price in rupees (e.g. 799)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+            <input type="number" step="1" placeholder="Old price to slash (e.g. 999) — optional" value={form.oldPrice} onChange={(e) => setForm({ ...form, oldPrice: e.target.value })} />
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+              {CATEGORIES.filter((c) => c !== 'All').map((c) => <option key={c}>{c}</option>)}
+            </select>
+            <input placeholder="Materials" value={form.materials} onChange={(e) => setForm({ ...form, materials: e.target.value })} />
+            <input placeholder="Colors, comma separated" value={form.colors} onChange={(e) => setForm({ ...form, colors: e.target.value })} />
+            <input type="number" placeholder="Stock" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
+            <label className="muted">Product photos<input type="file" accept="image/*" multiple onChange={async (e) => {
+              const urls = await readFiles(e.target.files)
+              setForm((f) => ({ ...f, images: [...(f.images || []), ...urls] }))
+              e.target.value = ''
+            }} /></label>
+            {form.images?.length > 0 && (
+              <div className="thumbs">
+                {form.images.map((src, i) => (
+                  <img key={i} src={src} alt="" className="on" onClick={() => setForm({ ...form, images: form.images.filter((_, idx) => idx !== i) })} title="Click to remove" />
+                ))}
+              </div>
+            )}
+            <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} />
+            <label><input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} /> Featured</label>
+            <label><input type="checkbox" checked={form.soldOut} onChange={(e) => setForm({ ...form, soldOut: e.target.checked })} /> Sold out</label>
+            <div className="actions">
+              <button className="pill-btn dark" type="submit">{form.id ? 'Update product' : 'Add product'}</button>
+              {form.id && <button className="pill-btn" type="button" onClick={() => setForm(empty)}>Cancel edit</button>}
+            </div>
+          </form>
+          <h2 style={{ marginTop: 36 }}>Products</h2>
+          {products.length === 0 && <p className="muted">No products yet.</p>}
+          <table className="table"><thead><tr><th></th><th>Name</th><th>Price</th><th>Stock</th><th></th></tr></thead><tbody>
+            {products.map((p) => (
+              <tr key={p.id}>
+                <td>{p.images?.[0] && <img src={p.images[0]} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 10 }} />}</td>
+                <td>{p.name}</td>
+                <td>{p.oldPrice > p.price ? <><s>₹{p.oldPrice}</s> ₹{p.price}</> : <>₹{p.price}</>}</td>
+                <td>{p.soldOut || p.stock <= 0 ? <span className="sold-text">Sold out</span> : p.stock}</td>
+                <td><button className="pill-btn" onClick={() => edit(p)}>Edit</button> <button className="pill-btn" onClick={() => deleteProduct(p.id)}>Delete</button></td>
+              </tr>
+            ))}
+          </tbody></table>
+          <h2 style={{ marginTop: 36 }}>Orders</h2>
+          <table className="table"><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>
+            {orders.map((o) => (
+              <tr key={o.id}><td>{o.id}</td><td>{o.customer?.name} · {o.email}</td><td>₹{Number(o.total || 0).toFixed(0)}</td><td>
+                <select value={o.status} onChange={(e) => updateOrderStatus(o.id, e.target.value)}>{['Pending','Confirmed','Shipped','Delivered','Cancelled'].map((s) => <option key={s}>{s}</option>)}</select>
+              </td></tr>
+            ))}
+          </tbody></table>
+        </>
+      )}
+
+      {tab === 'Display' && (
+        <div className="showcase-admin">
+          <h2>Landing page gallery</h2>
+          <p className="muted">Photos uploaded here appear in the homepage accordion and the first three float in the hero. Products do not show here.</p>
+          <label className="showcase-slot" style={{ minHeight: 88 }}>
+            <span>Add photos</span>
+            <input type="file" accept="image/*" multiple onChange={async (e) => {
+              if (!e.target.files?.length) return
+              await addGalleryImages(await readFiles(e.target.files))
+              e.target.value = ''
+            }} />
+          </label>
+          <div className="showcase-admin-grid" style={{ marginTop: 16 }}>
+            {(showcase || []).map((src, i) => (
+              <div key={src + i} className="showcase-slot">
+                <img src={src} alt="" />
+                <button type="button" className="pill-btn" onClick={() => removeGalleryImage(i)}>Remove</button>
+              </div>
             ))}
           </div>
-        )}
-        <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} />
-        <label><input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} /> Featured</label>
-        <label><input type="checkbox" checked={form.soldOut} onChange={(e) => setForm({ ...form, soldOut: e.target.checked })} /> Sold out</label>
-        <button className="pill-btn dark" type="submit">{form.id ? 'Update product' : 'Add product'}</button>
-      </form>
-      <h2 style={{ marginTop: 36 }}>Products</h2>
-      {products.length === 0 && <p className="muted">No products yet.</p>}
-      <table className="table"><thead><tr><th></th><th>Name</th><th>Price</th><th>Stock</th><th></th></tr></thead><tbody>
-        {products.map((p) => (
-          <tr key={p.id}>
-            <td>{p.images?.[0] && <img src={p.images[0]} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 10 }} />}</td>
-            <td>{p.name}</td>
-            <td>{p.oldPrice > p.price ? <><s>₹{p.oldPrice}</s> ₹{p.price}</> : <>₹{p.price}</>}</td>
-            <td>{p.soldOut ? 'Sold out' : p.stock}</td>
-            <td><button className="pill-btn" onClick={() => edit(p)}>Edit</button> <button className="pill-btn" onClick={() => deleteProduct(p.id)}>Delete</button></td>
-          </tr>
-        ))}
-      </tbody></table>
-      <h2 style={{ marginTop: 36 }}>Orders</h2>
-      <table className="table"><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>
-        {orders.map((o) => (
-          <tr key={o.id}><td>{o.id}</td><td>{o.customer?.name} · {o.email}</td><td>₹{Number(o.total || 0).toFixed(0)}</td><td>
-            <select value={o.status} onChange={(e) => updateOrderStatus(o.id, e.target.value)}>{['Pending','Confirmed','Shipped','Delivered','Cancelled'].map((s) => <option key={s}>{s}</option>)}</select>
-          </td></tr>
-        ))}
-      </tbody></table>
+          {!showcase?.length && <p className="muted">No display photos yet.</p>}
+        </div>
+      )}
     </section>
   )
 }
