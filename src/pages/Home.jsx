@@ -2,7 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard.jsx'
 import ParticleText from '../components/ParticleText.jsx'
+import AccordionGallery from '../components/AccordionGallery.jsx'
 import { useStore } from '../context/StoreContext.jsx'
+
+const LABELS = ['Ruby Bloom', 'Cuddle Bears', 'Heart Tote']
 
 export default function Home() {
   const { products, showcase } = useStore()
@@ -11,6 +14,11 @@ export default function Home() {
   const cats = ['All', 'Plushies', 'Flowers', 'Bags', 'Home']
   const list = products.filter((p) => cat === 'All' || p.category === cat)
   const photos = (showcase || []).filter(Boolean)
+  const galleryItems = photos.map((image, i) => ({
+    image,
+    label: LABELS[i] || `Piece ${i + 1}`,
+    alt: LABELS[i] || `Studio piece ${i + 1}`,
+  }))
 
   return (
     <>
@@ -56,16 +64,20 @@ export default function Home() {
         <button className="ghost-btn" onClick={() => nav('/shop')}>Explore the collection →</button>
       </section>
 
-      {photos.length > 0 && (
+      {galleryItems.length > 0 && (
         <section className="page showcase-strip">
           <p className="eyebrow">From the studio</p>
-          <div className="showcase-grid">
-            {photos.map((src, i) => (
-              <figure key={i} className="showcase-card">
-                <img src={src} alt={`Studio piece ${i + 1}`} />
-              </figure>
-            ))}
-          </div>
+          <AccordionGallery
+            items={galleryItems}
+            defaultIndex={0}
+            expandRatio={0.52}
+            trigger="hover"
+            height={420}
+            radius={22}
+            accentColor="#f6ead7"
+            overlayColor="#3a2416"
+            textColor="#fff8ef"
+          />
         </section>
       )}
 
