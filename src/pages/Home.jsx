@@ -1,7 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard.jsx'
 import { useStore } from '../context/StoreContext.jsx'
-import { flower_red, teddy_pair, bag_hearts } from '../heroImages.js'
+
+const flower =
+  'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=600&q=80'
+const teddies =
+  'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=600&q=80'
+const tote =
+  'https://images.unsplash.com/photo-1590874103328-eac38a94180d?auto=format&fit=crop&w=600&q=80'
 
 export default function Home() {
   const { products } = useStore()
@@ -12,13 +18,13 @@ export default function Home() {
     <>
       <section className="hero">
         <div className="float-card" style={{ width: 180, height: 180, left: '12%', top: '8%', transform: 'rotate(-8deg)' }}>
-          <img src={flower_red} alt="Crochet flower" />
+          <img src={flower} alt="Crochet flower" />
         </div>
         <div className="float-card" style={{ width: 220, height: 220, right: '10%', top: '10%', transform: 'rotate(7deg)' }}>
-          <img src={teddy_pair} alt="Crochet teddies" />
+          <img src={teddies} alt="Crochet teddies" />
         </div>
         <div className="float-card" style={{ width: 210, height: 210, left: '38%', bottom: '8%', transform: 'rotate(4deg)' }}>
-          <img src={bag_hearts} alt="Heart tote" />
+          <img src={tote} alt="Handmade tote" />
         </div>
         <span className="sq" style={{ left: '8%', bottom: '28%' }} />
         <span className="sq" style={{ right: '18%', top: '22%' }} />
