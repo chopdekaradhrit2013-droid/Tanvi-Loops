@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ProductCard from '../components/ProductCard.jsx'
 import ParticleText from '../components/ParticleText.jsx'
 import AccordionGallery from '../components/AccordionGallery.jsx'
+import ChromaGrid from '../components/ChromaGrid.jsx'
 import { useStore } from '../context/StoreContext.jsx'
 
 const LABELS = ['Ruby Bloom', 'Cuddle Bears', 'Heart Tote']
+const ACCENTS = ['#8a4b1f', '#9a3a45', '#6b7a6a', '#c45c2c', '#5c3014']
 
 export default function Home() {
   const { products, showcase } = useStore()
@@ -19,6 +20,20 @@ export default function Home() {
     label: LABELS[i] || `Piece ${i + 1}`,
     alt: LABELS[i] || `Studio piece ${i + 1}`,
   }))
+  const chromaItems = list.map((p, i) => {
+    const soldOut = p.soldOut || p.stock <= 0
+    const accent = ACCENTS[i % ACCENTS.length]
+    return {
+      id: p.id,
+      image: p.images?.[0],
+      title: p.name,
+      subtitle: p.oldPrice > p.price ? `₹${p.price}  ·  was ₹${p.oldPrice}` : `₹${Number(p.price).toLocaleString('en-IN')}`,
+      handle: soldOut ? 'Sold out' : p.category,
+      soldOut,
+      borderColor: soldOut ? '#c62828' : accent,
+      gradient: `linear-gradient(165deg, ${accent}, #1c1410)`,
+    }
+  })
 
   return (
     <>
@@ -82,9 +97,12 @@ export default function Home() {
           </div>
           <p className="muted">Thoughtful crochet pieces for gifting, collecting, and making everyday corners feel warmer.</p>
         </div>
-        <div className="grid studio-grid">
-          {list.map((p) => <ProductCard key={p.id} product={p} />)}
-        </div>
+        <ChromaGrid
+          items={chromaItems}
+          radius={280}
+          columns={3}
+          onItemClick={(item) => nav(`/product/${item.id}`)}
+        />
         {list.length === 0 && (
           <p className="muted" style={{ textAlign: 'center' }}>New pieces will appear here once a product is added.</p>
         )}
