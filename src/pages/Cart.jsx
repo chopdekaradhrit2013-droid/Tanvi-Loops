@@ -4,7 +4,7 @@ import { useStore } from '../context/StoreContext.jsx'
 export default function Cart() {
   const { cartItems, subtotal, updateQty, removeFromCart } = useStore()
   const nav = useNavigate()
-  const shipping = subtotal === 0 || subtotal > 80 ? 0 : 4
+  const shipping = subtotal === 0 || subtotal > 2000 ? 0 : 80
   return (
     <section className="page cart-wrap">
       <div>
@@ -24,7 +24,7 @@ export default function Cart() {
               </div>
             </div>
             <div>
-              <div>${(item.product.price * item.qty).toFixed(2)}</div>
+              <div>₹{(item.product.price * item.qty).toFixed(0)}</div>
               <button className="icon-btn" onClick={() => removeFromCart(item.id, item.color)}>Remove</button>
             </div>
           </div>
@@ -32,10 +32,10 @@ export default function Cart() {
       </div>
       <div>
         <div className="totals">
-          <div className="row"><span>Subtotal</span><strong>${subtotal.toFixed(2)}</strong></div>
+          <div className="row"><span>Subtotal</span><strong>₹{subtotal.toFixed(0)}</strong></div>
           <div className="row"><span>Estimated delivery</span><span>5–7 business days</span></div>
-          <div className="row"><span>Shipping</span><span>{shipping ? `$${shipping.toFixed(2)}` : 'Complimentary'}</span></div>
-          <div className="row"><span>Total</span><strong>${(subtotal + shipping).toFixed(2)}</strong></div>
+          <div className="row"><span>Shipping</span><span>{shipping ? `₹${shipping.toFixed(0)}` : 'Complimentary'}</span></div>
+          <div className="row"><span>Total</span><strong>₹{(subtotal + shipping).toFixed(0)}</strong></div>
         </div>
         <button className="pill-btn dark" style={{ marginTop: 20 }} disabled={!cartItems.length} onClick={() => nav('/checkout')}>→ Proceed to Checkout</button>
       </div>

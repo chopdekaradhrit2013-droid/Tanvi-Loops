@@ -14,7 +14,7 @@ export default function ProductCard({ product }) {
       <div className="card-body">
         <div className="row">
           <h3>{product.name}</h3>
-          <strong>${product.price.toFixed(2)}</strong>
+          <strong>₹{Number(product.price).toFixed(0)}</strong>
         </div>
         <div className="muted">{product.category}{product.soldOut ? ' · Sold out' : ''}</div>
       </div>
