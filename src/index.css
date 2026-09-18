@@ -19,6 +19,7 @@ img { max-width: 100%; display: block; }
 .nav { position: sticky; top: 0; z-index: 40; backdrop-filter: blur(16px); background: rgba(251,248,244,0.86); }
 .nav-inner { max-width: 1240px; margin: 0 auto; padding: 16px 28px; display: flex; align-items: center; gap: 22px; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.brand-logo { width: 42px; height: 42px; object-fit: contain; }
 .brand-mark { width: 14px; height: 14px; border: 1.5px solid var(--ink); border-radius: 50%; position: relative; }
 .brand-mark::after { content: ''; position: absolute; inset: 3px; border: 1.4px solid #9a3a45; border-radius: 50%; }
 .nav-links { display: flex; gap: 20px; margin-left: 18px; color: var(--ink-soft); font-size: 14px; }

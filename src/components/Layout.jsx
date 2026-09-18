@@ -19,7 +19,7 @@ export default function Layout({ children }) {
       <header className="nav">
         <div className="nav-inner">
           <Link to="/" className="brand">
-            <span className="brand-mark" />
+            <img className="brand-logo" src="/logo.png" alt="Tanvi Loops" />
             Tanvi Loops
           </Link>
           <nav className="nav-links">
@@ -49,7 +49,7 @@ export default function Layout({ children }) {
       {open && (
         <div className="drawer" onClick={() => setOpen(false)}>
           <nav onClick={(e) => e.stopPropagation()}>
-            <div className="brand"><span className="brand-mark" /> Tanvi Loops</div>
+            <div className="brand"><img className="brand-logo" src="/logo.png" alt="" /> Tanvi Loops</div>
             {links.map(([to, label]) => (
               <Link key={to} to={to} onClick={() => setOpen(false)}>{label}</Link>
             ))}
