@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext.jsx'
 import BubbleMenu from './BubbleMenu.jsx'
+import GradualBlur from './GradualBlur.jsx'
 
 export default function Layout({ children }) {
   const { user, toast, signOut } = useStore()
@@ -18,12 +19,7 @@ export default function Layout({ children }) {
   return (
     <>
       <BubbleMenu
-        logo={
-          <>
-            <img src="/logo.svg" alt="" className="bubble-logo" />
-            <span>Tanvi Loops</span>
-          </>
-        }
+        logo={<><img src="/logo.svg" alt="" className="bubble-logo" /><span>Tanvi Loops</span></>}
         items={items}
         menuAriaLabel="Toggle navigation"
         menuBg="#fff8ef"
@@ -33,9 +29,11 @@ export default function Layout({ children }) {
         animationDuration={0.5}
         staggerDelay={0.1}
       />
+      <GradualBlur target="page" position="top" height="5.5rem" strength={2} divCount={5} curve="bezier" exponential opacity={1} zIndex={30} />
       <main className="site-with-bubbles">{children}</main>
+      <GradualBlur target="page" position="bottom" height="5.5rem" strength={2} divCount={5} curve="bezier" exponential opacity={1} zIndex={30} />
       {user && (
-        <button className="pill-btn" style={{ position: 'fixed', right: 18, bottom: 18, zIndex: 40 }} onClick={() => { signOut(); nav('/') }}>
+        <button className="pill-btn" style={{ position: 'fixed', right: 18, bottom: 18, zIndex: 50 }} onClick={() => { signOut(); nav('/') }}>
           Sign out
         </button>
       )}
