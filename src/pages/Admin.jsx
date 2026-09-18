@@ -20,7 +20,7 @@ function readFiles(files) {
 }
 
 export default function Admin() {
-  const { products, orders, showcase, upsertProduct, deleteProduct, updateOrderStatus, setShowcaseImage, user } = useStore()
+  const { products, orders, showcase, upsertProduct, deleteProduct, updateOrderStatus, setShowcaseImage, user, supabaseEnabled, cloudReady } = useStore()
   const [form, setForm] = useState(empty)
   const revenue = orders.reduce((s, o) => s + (o.status === 'Cancelled' ? 0 : o.total), 0)
   const low = products.filter((p) => p.stock <= 3)
@@ -34,12 +34,12 @@ export default function Admin() {
     const file = e.target.files?.[0]
     if (!file) return
     const url = await readFile(file)
-    setShowcaseImage(index, url)
+    await setShowcaseImage(index, url)
     e.target.value = ''
   }
-  const save = (e) => {
+  const save = async (e) => {
     e.preventDefault()
-    upsertProduct({
+    await upsertProduct({
       ...form,
       id: form.id || form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       price: Number(form.price) || 0,
@@ -54,18 +54,17 @@ export default function Admin() {
       <p className="kicker">Tanvi Loops</p>
       <h1 className="display" style={{ fontSize: 56 }}>Admin Dashboard</h1>
       <p className="muted">Signed in as {user?.email}.</p>
+      <p className={supabaseEnabled ? 'muted' : 'muted'} style={{ color: supabaseEnabled ? '#2f6b3f' : '#8a4b1f' }}>
+        {supabaseEnabled ? (cloudReady ? 'Supabase connected — uploads sync to every customer.' : 'Connecting to Supabase…') : 'Supabase keys are missing. Follow SETUP-SUPABASE.md so customers can see uploads.'}
+      </p>
 
       <div className="showcase-admin">
         <h2>Homepage photos</h2>
-        <p className="muted">Upload exactly these 3 pictures. They appear on the customer homepage (hero + studio strip).</p>
+        <p className="muted">Upload these 3 pictures. They appear on the customer homepage for everyone.</p>
         <div className="showcase-admin-grid">
           {[0, 1, 2].map((i) => (
             <label key={i} className="showcase-slot">
-              {showcase?.[i] ? (
-                <img src={showcase[i]} alt={`Slot ${i + 1}`} />
-              ) : (
-                <span>Photo {i + 1}</span>
-              )}
+              {showcase?.[i] ? <img src={showcase[i]} alt={`Slot ${i + 1}`} /> : <span>Photo {i + 1}</span>}
               <input type="file" accept="image/*" onChange={(e) => onShowcase(i, e)} />
               {showcase?.[i] && (
                 <button type="button" className="pill-btn" onClick={(e) => { e.preventDefault(); setShowcaseImage(i, '') }}>Remove</button>
@@ -118,7 +117,7 @@ export default function Admin() {
       <h2 style={{ marginTop: 36 }}>Orders</h2>
       <table className="table"><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>
         {orders.map((o) => (
-          <tr key={o.id}><td>{o.id}</td><td>{o.customer?.name} · {o.email}</td><td>₹{o.total.toFixed(0)}</td><td>
+          <tr key={o.id}><td>{o.id}</td><td>{o.customer?.name} · {o.email}</td><td>₹{Number(o.total || 0).toFixed(0)}</td><td>
             <select value={o.status} onChange={(e) => updateOrderStatus(o.id, e.target.value)}>{['Pending','Confirmed','Shipped','Delivered','Cancelled'].map((s) => <option key={s}>{s}</option>)}</select>
           </td></tr>
         ))}
