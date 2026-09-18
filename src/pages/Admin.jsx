@@ -3,7 +3,7 @@ import { CATEGORIES } from '../data/products.js'
 import { useStore } from '../context/StoreContext.jsx'
 
 const empty = {
-  id: '', name: '', price: '', category: 'Plushies', materials: '', colors: '',
+  id: '', name: '', price: '', oldPrice: '', category: 'Plushies', materials: '', colors: '',
   stock: 1, featured: true, soldOut: false, images: [], description: '',
 }
 
@@ -50,13 +50,19 @@ export default function Admin() {
   const [form, setForm] = useState(empty)
   const revenue = orders.reduce((s, o) => s + (o.status === 'Cancelled' ? 0 : o.total), 0)
   const low = products.filter((p) => p.stock <= 3)
-  const edit = (p) => setForm({ ...p, colors: Array.isArray(p.colors) ? p.colors.join(', ') : p.colors, images: p.images || [] })
+  const edit = (p) => setForm({
+    ...p,
+    colors: Array.isArray(p.colors) ? p.colors.join(', ') : p.colors,
+    images: p.images || [],
+    oldPrice: p.oldPrice || '',
+  })
   const save = async (e) => {
     e.preventDefault()
     await upsertProduct({
       ...form,
       id: form.id || form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
       price: Number(form.price) || 0,
+      oldPrice: Number(form.oldPrice) || 0,
       stock: Number(form.stock) || 0,
       colors: String(form.colors || '').split(',').map((s) => s.trim()).filter(Boolean),
       images: form.images || [],
@@ -72,20 +78,8 @@ export default function Admin() {
         {supabaseEnabled ? (cloudReady ? 'Supabase connected — uploads sync to every customer.' : 'Connecting to Supabase…') : 'Supabase keys are missing.'}
       </p>
 
-      <PhotoSection
-        title="Landing page gallery"
-        help="These photos appear in the homepage accordion and the first three float in the hero."
-        photos={showcase}
-        onAdd={addGalleryImages}
-        onRemove={removeGalleryImage}
-      />
-      <PhotoSection
-        title="Collection"
-        help="These photos appear in the Collection section on the homepage."
-        photos={collection}
-        onAdd={addCollectionImages}
-        onRemove={removeCollectionImage}
-      />
+      <PhotoSection title="Landing page gallery" help="These photos appear in the homepage accordion and the first three float in the hero." photos={showcase} onAdd={addGalleryImages} onRemove={removeGalleryImage} />
+      <PhotoSection title="Collection" help="These photos appear in the Collection section on the homepage." photos={collection} onAdd={addCollectionImages} onRemove={removeCollectionImage} />
 
       <div className="admin-stats">
         <div className="stat"><div className="muted">Total products</div><strong>{products.length}</strong></div>
@@ -96,7 +90,8 @@ export default function Admin() {
       <h2>Add product</h2>
       <form className="form" onSubmit={save}>
         <input placeholder="Product name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-        <input type="number" step="1" placeholder="Price in rupees" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+        <input type="number" step="1" placeholder="New price in rupees (e.g. 799)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+        <input type="number" step="1" placeholder="Old price to slash (e.g. 999) — optional" value={form.oldPrice} onChange={(e) => setForm({ ...form, oldPrice: e.target.value })} />
         <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
           {CATEGORIES.filter((c) => c !== 'All').map((c) => <option key={c}>{c}</option>)}
         </select>
@@ -126,7 +121,9 @@ export default function Admin() {
         {products.map((p) => (
           <tr key={p.id}>
             <td>{p.images?.[0] && <img src={p.images[0]} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 10 }} />}</td>
-            <td>{p.name}</td><td>₹{p.price}</td><td>{p.soldOut ? 'Sold out' : p.stock}</td>
+            <td>{p.name}</td>
+            <td>{p.oldPrice > p.price ? <><s>₹{p.oldPrice}</s> ₹{p.price}</> : <>₹{p.price}</>}</td>
+            <td>{p.soldOut ? 'Sold out' : p.stock}</td>
             <td><button className="pill-btn" onClick={() => edit(p)}>Edit</button> <button className="pill-btn" onClick={() => deleteProduct(p.id)}>Delete</button></td>
           </tr>
         ))}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../context/StoreContext.jsx'
+import Price from '../components/Price.jsx'
 
 export default function Product() {
   const { id } = useParams()
@@ -26,7 +27,7 @@ export default function Product() {
       <div>
         <p className="kicker" style={{ fontSize: 28 }}>{product.category}</p>
         <h1 className="display" style={{ fontSize: 52 }}>{product.name}</h1>
-        <p className="price">₹{Number(product.price).toFixed(0)}</p>
+        <p className="price"><Price price={product.price} oldPrice={product.oldPrice} size="detail" /></p>
         <p>{product.description}</p>
         <p className="muted">{product.materials}</p>
         <p>{product.soldOut || product.stock <= 0 ? 'Sold out' : `In stock · ${product.stock} remaining`}</p>

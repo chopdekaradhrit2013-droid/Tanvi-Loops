@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext.jsx'
+import Price from './Price.jsx'
 
 export default function ProductCard({ product }) {
   const nav = useNavigate()
@@ -14,7 +15,7 @@ export default function ProductCard({ product }) {
       <div className="card-body">
         <div className="row">
           <h3 onClick={() => nav(`/product/${product.id}`)}>{product.name}</h3>
-          <strong>₹{Number(product.price).toLocaleString('en-IN')}</strong>
+          <Price price={product.price} oldPrice={product.oldPrice} />
         </div>
         <p className="muted">{product.description}</p>
         <button className="ghost-btn wide" onClick={() => addToCart(product, 1, product.colors?.[0])}>Add to bag</button>

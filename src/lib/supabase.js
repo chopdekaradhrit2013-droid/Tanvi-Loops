@@ -30,12 +30,28 @@ export async function uploadDataUrl(dataUrl, folder = 'uploads') {
   return data.publicUrl
 }
 
+function extraFromDescription(description) {
+  const raw = String(description || '')
+  const match = raw.match(/^\{\"oldPrice\":(\d+)\}\n?/)
+  if (!match) return { oldPrice: 0, description: raw }
+  return { oldPrice: Number(match[1]) || 0, description: raw.slice(match[0].length) }
+}
+
+function extraToDescription(product) {
+  const oldPrice = Number(product.oldPrice) || 0
+  const text = product.description || ''
+  if (!oldPrice) return text
+  return `{"oldPrice":${oldPrice}}\n${text}`
+}
+
 export function mapProduct(row) {
   if (!row) return null
+  const parsed = extraFromDescription(row.description)
   return {
     id: row.id,
     name: row.name,
     price: Number(row.price) || 0,
+    oldPrice: Number(row.old_price) || parsed.oldPrice || 0,
     category: row.category || 'Plushies',
     materials: row.materials || '',
     colors: row.colors || [],
@@ -43,7 +59,7 @@ export function mapProduct(row) {
     featured: !!row.featured,
     soldOut: !!row.sold_out,
     images: row.images || [],
-    description: row.description || '',
+    description: parsed.description,
   }
 }
 
@@ -59,6 +75,6 @@ export function toRow(product) {
     featured: !!product.featured,
     sold_out: !!product.soldOut,
     images: product.images || [],
-    description: product.description || '',
+    description: extraToDescription(product),
   }
 }
