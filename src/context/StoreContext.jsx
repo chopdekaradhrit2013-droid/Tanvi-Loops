@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { PRODUCTS as SEED } from '../data/products'
 
 const StoreContext = createContext(null)
-const KEY = 'tanvi-loops-store-v3'
+const KEY = 'tanvi-loops-store-v4'
 
 function load() {
   try {
