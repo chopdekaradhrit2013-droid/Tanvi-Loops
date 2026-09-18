@@ -7,36 +7,50 @@ const empty = {
   stock: 1, featured: true, soldOut: false, images: [], description: '',
 }
 
-function readFile(file) {
-  return new Promise((resolve) => {
+function readFiles(files) {
+  return Promise.all(Array.from(files).map((file) => new Promise((resolve) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result)
     reader.readAsDataURL(file)
-  })
+  })))
 }
 
-function readFiles(files) {
-  return Promise.all(Array.from(files).map(readFile))
+function PhotoSection({ title, help, photos, onAdd, onRemove }) {
+  return (
+    <div className="showcase-admin">
+      <h2>{title}</h2>
+      <p className="muted">{help}</p>
+      <label className="showcase-slot" style={{ minHeight: 88 }}>
+        <span>Add photos</span>
+        <input type="file" accept="image/*" multiple onChange={async (e) => {
+          if (!e.target.files?.length) return
+          await onAdd(await readFiles(e.target.files))
+          e.target.value = ''
+        }} />
+      </label>
+      <div className="showcase-admin-grid" style={{ marginTop: 16 }}>
+        {(photos || []).map((src, i) => (
+          <div key={src + i} className="showcase-slot">
+            <img src={src} alt="" />
+            <button type="button" className="pill-btn" onClick={() => onRemove(i)}>Remove</button>
+          </div>
+        ))}
+      </div>
+      {!photos?.length && <p className="muted">No photos yet.</p>}
+    </div>
+  )
 }
 
 export default function Admin() {
-  const { products, orders, showcase, upsertProduct, deleteProduct, updateOrderStatus, addGalleryImages, removeGalleryImage, user, supabaseEnabled, cloudReady } = useStore()
+  const {
+    products, orders, showcase, collection, upsertProduct, deleteProduct, updateOrderStatus,
+    addGalleryImages, removeGalleryImage, addCollectionImages, removeCollectionImage,
+    user, supabaseEnabled, cloudReady,
+  } = useStore()
   const [form, setForm] = useState(empty)
   const revenue = orders.reduce((s, o) => s + (o.status === 'Cancelled' ? 0 : o.total), 0)
   const low = products.filter((p) => p.stock <= 3)
   const edit = (p) => setForm({ ...p, colors: Array.isArray(p.colors) ? p.colors.join(', ') : p.colors, images: p.images || [] })
-  const onImages = async (e) => {
-    const urls = await readFiles(e.target.files)
-    setForm((f) => ({ ...f, images: [...(f.images || []), ...urls] }))
-    e.target.value = ''
-  }
-  const onGallery = async (e) => {
-    const files = e.target.files
-    if (!files?.length) return
-    const urls = await readFiles(files)
-    await addGalleryImages(urls)
-    e.target.value = ''
-  }
   const save = async (e) => {
     e.preventDefault()
     await upsertProduct({
@@ -58,23 +72,20 @@ export default function Admin() {
         {supabaseEnabled ? (cloudReady ? 'Supabase connected — uploads sync to every customer.' : 'Connecting to Supabase…') : 'Supabase keys are missing.'}
       </p>
 
-      <div className="showcase-admin">
-        <h2>Landing page gallery</h2>
-        <p className="muted">Upload as many photos as you want. They appear in the customer homepage gallery. The first three also float in the hero.</p>
-        <label className="showcase-slot" style={{ minHeight: 88 }}>
-          <span>Add photos</span>
-          <input type="file" accept="image/*" multiple onChange={onGallery} />
-        </label>
-        <div className="showcase-admin-grid" style={{ marginTop: 16 }}>
-          {(showcase || []).map((src, i) => (
-            <div key={src + i} className="showcase-slot">
-              <img src={src} alt={`Gallery ${i + 1}`} />
-              <button type="button" className="pill-btn" onClick={() => removeGalleryImage(i)}>Remove</button>
-            </div>
-          ))}
-        </div>
-        {!showcase?.length && <p className="muted">No gallery photos yet.</p>}
-      </div>
+      <PhotoSection
+        title="Landing page gallery"
+        help="These photos appear in the homepage accordion and the first three float in the hero."
+        photos={showcase}
+        onAdd={addGalleryImages}
+        onRemove={removeGalleryImage}
+      />
+      <PhotoSection
+        title="Collection"
+        help="These photos appear in the Collection section on the homepage."
+        photos={collection}
+        onAdd={addCollectionImages}
+        onRemove={removeCollectionImage}
+      />
 
       <div className="admin-stats">
         <div className="stat"><div className="muted">Total products</div><strong>{products.length}</strong></div>
@@ -92,7 +103,11 @@ export default function Admin() {
         <input placeholder="Materials" value={form.materials} onChange={(e) => setForm({ ...form, materials: e.target.value })} />
         <input placeholder="Colors, comma separated" value={form.colors} onChange={(e) => setForm({ ...form, colors: e.target.value })} />
         <input type="number" placeholder="Stock" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
-        <label className="muted">Product photos<input type="file" accept="image/*" multiple onChange={onImages} /></label>
+        <label className="muted">Product photos<input type="file" accept="image/*" multiple onChange={async (e) => {
+          const urls = await readFiles(e.target.files)
+          setForm((f) => ({ ...f, images: [...(f.images || []), ...urls] }))
+          e.target.value = ''
+        }} /></label>
         {form.images?.length > 0 && (
           <div className="thumbs">
             {form.images.map((src, i) => (
@@ -106,7 +121,7 @@ export default function Admin() {
         <button className="pill-btn dark" type="submit">{form.id ? 'Update product' : 'Add product'}</button>
       </form>
       <h2 style={{ marginTop: 36 }}>Products</h2>
-      {products.length === 0 && <p className="muted">No products yet. Upload photos and details above.</p>}
+      {products.length === 0 && <p className="muted">No products yet.</p>}
       <table className="table"><thead><tr><th></th><th>Name</th><th>Price</th><th>Stock</th><th></th></tr></thead><tbody>
         {products.map((p) => (
           <tr key={p.id}>

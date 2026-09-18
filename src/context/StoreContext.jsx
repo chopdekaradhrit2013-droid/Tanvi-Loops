@@ -3,7 +3,8 @@ import { PRODUCTS as SEED } from '../data/products'
 import { mapProduct, supabase, supabaseEnabled, toRow, uploadDataUrl } from '../lib/supabase'
 
 const StoreContext = createContext(null)
-const KEY = 'tanvi-loops-store-v7'
+const KEY = 'tanvi-loops-store-v8'
+const COLLECTION_BASE = 1000
 
 function load() {
   try {
@@ -15,12 +16,14 @@ function load() {
   }
 }
 
-async function persistGallery(urls) {
+async function persistSlots(urls, base) {
   if (!supabaseEnabled) return
-  const rows = urls.map((image_url, slot) => ({ slot, image_url }))
+  const rows = urls.map((image_url, i) => ({ slot: base + i, image_url }))
   if (rows.length) await supabase.from('showcase').upsert(rows)
   const { data } = await supabase.from('showcase').select('slot')
-  const extra = (data || []).filter((r) => r.slot >= urls.length).map((r) => r.slot)
+  const extra = (data || [])
+    .map((r) => r.slot)
+    .filter((slot) => slot >= base && slot < base + 1000 && slot >= base + urls.length)
   if (extra.length) await supabase.from('showcase').delete().in('slot', extra)
 }
 
@@ -28,6 +31,7 @@ export function StoreProvider({ children }) {
   const saved = load()
   const [products, setProducts] = useState(saved?.products || SEED)
   const [showcase, setShowcase] = useState(Array.isArray(saved?.showcase) ? saved.showcase.filter(Boolean) : [])
+  const [collection, setCollection] = useState(Array.isArray(saved?.collection) ? saved.collection.filter(Boolean) : [])
   const [cart, setCart] = useState(saved?.cart || [])
   const [favourites, setFavourites] = useState(saved?.favourites || [])
   const [user, setUser] = useState(saved?.user || null)
@@ -39,8 +43,8 @@ export function StoreProvider({ children }) {
   const [cloudReady, setCloudReady] = useState(false)
 
   useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify({ products, showcase, cart, favourites, user, users, orders }))
-  }, [products, showcase, cart, favourites, user, users, orders])
+    localStorage.setItem(KEY, JSON.stringify({ products, showcase, collection, cart, favourites, user, users, orders }))
+  }, [products, showcase, collection, cart, favourites, user, users, orders])
 
   useEffect(() => {
     if (!toast) return
@@ -59,18 +63,14 @@ export function StoreProvider({ children }) {
       ])
       if (!alive) return
       if (productRows) setProducts(productRows.map(mapProduct))
-      if (showRows) setShowcase(showRows.map((r) => r.image_url).filter(Boolean))
+      if (showRows) {
+        setShowcase(showRows.filter((r) => r.slot < COLLECTION_BASE).map((r) => r.image_url).filter(Boolean))
+        setCollection(showRows.filter((r) => r.slot >= COLLECTION_BASE).map((r) => r.image_url).filter(Boolean))
+      }
       if (orderRows) {
         setOrders(orderRows.map((o) => ({
-          id: o.id,
-          createdAt: o.created_at,
-          status: o.status,
-          customer: o.customer,
-          items: o.items,
-          subtotal: Number(o.subtotal) || 0,
-          shipping: Number(o.shipping) || 0,
-          total: Number(o.total) || 0,
-          email: o.email,
+          id: o.id, createdAt: o.created_at, status: o.status, customer: o.customer, items: o.items,
+          subtotal: Number(o.subtotal) || 0, shipping: Number(o.shipping) || 0, total: Number(o.total) || 0, email: o.email,
         })))
       }
       setCloudReady(true)
@@ -91,18 +91,34 @@ export function StoreProvider({ children }) {
       const uploaded = await Promise.all(dataUrls.map((url) => uploadDataUrl(url, 'showcase')))
       const next = [...showcase, ...uploaded.filter(Boolean)]
       setShowcase(next)
-      await persistGallery(next)
-      notify('Gallery photos added')
+      await persistSlots(next, 0)
+      notify('Landing page gallery updated')
     } catch (err) {
       notify(err.message || 'Could not upload gallery photos')
     }
   }
-
   const removeGalleryImage = async (index) => {
     const next = showcase.filter((_, i) => i !== index)
     setShowcase(next)
-    await persistGallery(next)
+    await persistSlots(next, 0)
     notify('Photo removed from gallery')
+  }
+  const addCollectionImages = async (dataUrls) => {
+    try {
+      const uploaded = await Promise.all(dataUrls.map((url) => uploadDataUrl(url, 'collection')))
+      const next = [...collection, ...uploaded.filter(Boolean)]
+      setCollection(next)
+      await persistSlots(next, COLLECTION_BASE)
+      notify('Collection photos updated')
+    } catch (err) {
+      notify(err.message || 'Could not upload collection photos')
+    }
+  }
+  const removeCollectionImage = async (index) => {
+    const next = collection.filter((_, i) => i !== index)
+    setCollection(next)
+    await persistSlots(next, COLLECTION_BASE)
+    notify('Photo removed from collection')
   }
 
   const addToCart = (product, qty = 1, color) => {
@@ -116,9 +132,7 @@ export function StoreProvider({ children }) {
   }
   const updateQty = (id, color, qty) => setCart((prev) => prev.map((x) => (x.id === id && x.color === color ? { ...x, qty } : x)).filter((x) => x.qty > 0))
   const removeFromCart = (id, color) => setCart((prev) => prev.filter((x) => !(x.id === id && x.color === color)))
-  const toggleFavourite = (id) => {
-    setFavourites((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
-  }
+  const toggleFavourite = (id) => setFavourites((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
   const signUp = ({ name, email, password }) => {
     if (users.some((u) => u.email === email)) return { ok: false, error: 'Email already registered' }
     setUsers((u) => [...u, { name, email, password, isAdmin: false }])
@@ -178,11 +192,12 @@ export function StoreProvider({ children }) {
   const cartItems = cart.map((c) => ({ ...c, product: products.find((p) => p.id === c.id) })).filter((x) => x.product)
   const subtotal = cartItems.reduce((s, i) => s + i.product.price * i.qty, 0)
   const value = useMemo(() => ({
-    products, showcase, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast,
+    products, showcase, collection, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast,
     cloudReady, supabaseEnabled,
     addToCart, updateQty, removeFromCart, toggleFavourite, signUp, signIn, signOut,
-    placeOrder, updateOrderStatus, upsertProduct, deleteProduct, addGalleryImages, removeGalleryImage, notify,
-  }), [products, showcase, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast, cloudReady])
+    placeOrder, updateOrderStatus, upsertProduct, deleteProduct,
+    addGalleryImages, removeGalleryImage, addCollectionImages, removeCollectionImage, notify,
+  }), [products, showcase, collection, cart, cartItems, cartCount, subtotal, favourites, user, orders, toast, cloudReady])
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }
 
