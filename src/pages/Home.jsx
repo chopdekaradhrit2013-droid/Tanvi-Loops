@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard.jsx'
 import { useStore } from '../context/StoreContext.jsx'
+import { flower_red, teddy_pair, bag_hearts } from '../heroImages.js'
 
 export default function Home() {
   const { products } = useStore()
@@ -11,13 +12,13 @@ export default function Home() {
     <>
       <section className="hero">
         <div className="float-card" style={{ width: 180, height: 180, left: '12%', top: '8%', transform: 'rotate(-8deg)' }}>
-          <img src="/products/flower-red.jpg" alt="" />
+          <img src={flower_red} alt="Crochet flower" />
         </div>
         <div className="float-card" style={{ width: 220, height: 220, right: '10%', top: '10%', transform: 'rotate(7deg)' }}>
-          <img src="/products/teddy-pair.jpg" alt="" />
+          <img src={teddy_pair} alt="Crochet teddies" />
         </div>
         <div className="float-card" style={{ width: 210, height: 210, left: '38%', bottom: '8%', transform: 'rotate(4deg)' }}>
-          <img src="/products/bag-hearts.jpg" alt="" />
+          <img src={bag_hearts} alt="Heart tote" />
         </div>
         <span className="sq" style={{ left: '8%', bottom: '28%' }} />
         <span className="sq" style={{ right: '18%', top: '22%' }} />
