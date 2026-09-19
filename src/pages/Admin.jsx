@@ -6,7 +6,7 @@ const empty = {
   id: '', name: '', price: '', oldPrice: '', category: 'Plushies', materials: '', colors: '',
   stock: 1, featured: true, soldOut: false, images: [], description: '',
 }
-const TABS = ['Collection', 'Product', 'Display']
+const TABS = ['Collection', 'Product', 'Orders', 'Display']
 
 function readFiles(files) {
   return Promise.all(Array.from(files).map((file) => new Promise((resolve) => {
@@ -14,6 +14,62 @@ function readFiles(files) {
     reader.onload = () => resolve(reader.result)
     reader.readAsDataURL(file)
   })))
+}
+
+function OrderCard({ o, updateOrderStatus, open, onToggle }) {
+  const c = o.customer || {}
+  return (
+    <article className={'order-card' + (open ? ' open' : '')}>
+      <button type="button" className="order-card-head" onClick={onToggle}>
+        <div>
+          <strong>{o.id}</strong>
+          <div className="muted">{c.name || o.email} · {new Date(o.createdAt).toLocaleString()}</div>
+        </div>
+        <div className="order-card-meta">
+          <span>₹{Number(o.total || 0).toFixed(0)}</span>
+          <span className="muted">{o.status}</span>
+          <span className="order-chevron">{open ? '−' : '+'}</span>
+        </div>
+      </button>
+      {open && (
+        <div className="order-card-body">
+          <div className="order-grid">
+            <div>
+              <p className="eyebrow">Customer</p>
+              <p><strong>{c.name || '—'}</strong></p>
+              <p>{c.email || o.email}</p>
+              <p>{c.phone || '—'}</p>
+            </div>
+            <div>
+              <p className="eyebrow">Deliver to</p>
+              <p>{c.address || 'No street given'}</p>
+              {c.landmark && <p>Landmark: {c.landmark}</p>}
+              <p>{[c.city, c.state, c.pincode].filter(Boolean).join(', ')}</p>
+              <p>{c.country || 'India'}</p>
+            </div>
+            <div>
+              <p className="eyebrow">Payment</p>
+              <p>Cash on delivery</p>
+              <p>Collect ₹{Number(o.total || 0).toFixed(0)}</p>
+              <label className="muted">Status
+                <select value={o.status} onChange={(e) => updateOrderStatus(o.id, e.target.value)}>
+                  {['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'].map((s) => <option key={s}>{s}</option>)}
+                </select>
+              </label>
+            </div>
+          </div>
+          <p className="eyebrow" style={{ marginTop: 16 }}>Items</p>
+          {(o.items || []).map((i, idx) => (
+            <div className="line-item" key={idx}>
+              {i.image && <img src={i.image} alt="" />}
+              <div>{i.name}<div className="muted">Qty {i.qty}{i.color ? ` · ${i.color}` : ''}</div></div>
+              <div>₹{Number((i.price || 0) * (i.qty || 1)).toFixed(0)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </article>
+  )
 }
 
 export default function Admin() {
@@ -24,6 +80,7 @@ export default function Admin() {
   } = useStore()
   const [tab, setTab] = useState('Product')
   const [form, setForm] = useState(empty)
+  const [openOrder, setOpenOrder] = useState(null)
   const revenue = orders.reduce((s, o) => s + (o.status === 'Cancelled' ? 0 : o.total), 0)
   const low = products.filter((p) => p.stock <= 3)
 
@@ -50,6 +107,18 @@ export default function Admin() {
     })
     setForm(empty)
   }
+
+  const orderList = orders.length === 0
+    ? <p className="muted">No orders yet.</p>
+    : orders.map((o) => (
+      <OrderCard
+        key={o.id}
+        o={o}
+        updateOrderStatus={updateOrderStatus}
+        open={openOrder === o.id}
+        onToggle={() => setOpenOrder((id) => id === o.id ? null : o.id)}
+      />
+    ))
 
   return (
     <section className="page">
@@ -141,15 +210,15 @@ export default function Admin() {
               </tr>
             ))}
           </tbody></table>
-          <h2 style={{ marginTop: 36 }}>Orders</h2>
-          <table className="table"><thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>
-            {orders.map((o) => (
-              <tr key={o.id}><td>{o.id}</td><td>{o.customer?.name} · {o.email}</td><td>₹{Number(o.total || 0).toFixed(0)}</td><td>
-                <select value={o.status} onChange={(e) => updateOrderStatus(o.id, e.target.value)}>{['Pending','Confirmed','Shipped','Delivered','Cancelled'].map((s) => <option key={s}>{s}</option>)}</select>
-              </td></tr>
-            ))}
-          </tbody></table>
         </>
+      )}
+
+      {tab === 'Orders' && (
+        <div>
+          <h2>Orders</h2>
+          <p className="muted">Tap an order to see the full address, phone, and items.</p>
+          {orderList}
+        </div>
       )}
 
       {tab === 'Display' && (
