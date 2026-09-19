@@ -6,7 +6,7 @@ const empty = {
   id: '', name: '', price: '', oldPrice: '', category: 'Plushies', materials: '', colors: '',
   stock: 1, featured: true, soldOut: false, images: [], description: '',
 }
-const TABS = ['Collection', 'Product', 'Orders', 'Display']
+const TABS = ['Orders', 'Product', 'Collection', 'Display']
 
 function readFiles(files) {
   return Promise.all(Array.from(files).map((file) => new Promise((resolve) => {
@@ -78,7 +78,7 @@ export default function Admin() {
     addGalleryImages, removeGalleryImage,
     user, supabaseEnabled, cloudReady,
   } = useStore()
-  const [tab, setTab] = useState('Product')
+  const [tab, setTab] = useState('Orders')
   const [form, setForm] = useState(empty)
   const [openOrder, setOpenOrder] = useState(null)
   const revenue = orders.reduce((s, o) => s + (o.status === 'Cancelled' ? 0 : o.total), 0)
@@ -109,7 +109,7 @@ export default function Admin() {
   }
 
   const orderList = orders.length === 0
-    ? <p className="muted">No orders yet.</p>
+    ? <p className="muted">No customer orders yet. New COD checkouts will show up here with the full address.</p>
     : orders.map((o) => (
       <OrderCard
         key={o.id}
@@ -130,8 +130,12 @@ export default function Admin() {
       </p>
 
       <div className="admin-stats">
-        <div className="stat"><div className="muted">Total products</div><strong>{products.length}</strong></div>
-        <div className="stat"><div className="muted">Orders</div><strong>{orders.length}</strong></div>
+        <button type="button" className="stat" onClick={() => setTab('Product')}>
+          <div className="muted">Total products</div><strong>{products.length}</strong>
+        </button>
+        <button type="button" className="stat" onClick={() => setTab('Orders')}>
+          <div className="muted">Orders — tap here</div><strong>{orders.length}</strong>
+        </button>
         <div className="stat"><div className="muted">Revenue</div><strong>₹{revenue.toFixed(0)}</strong></div>
         <div className="stat"><div className="muted">Low stock</div><strong>{low.length}</strong></div>
       </div>
@@ -139,7 +143,7 @@ export default function Admin() {
       <div className="admin-tabs" role="tablist">
         {TABS.map((name) => (
           <button key={name} type="button" className={'admin-tab' + (tab === name ? ' on' : '')} onClick={() => setTab(name)}>
-            {name}
+            {name}{name === 'Orders' ? ` (${orders.length})` : ''}
           </button>
         ))}
       </div>
@@ -147,7 +151,7 @@ export default function Admin() {
       {tab === 'Collection' && (
         <div className="showcase-admin">
           <h2>Collection</h2>
-          <p className="muted">This list is filled automatically from products. Edit a product in the Product tab and it updates here and on the customer homepage.</p>
+          <p className="muted">This list is filled automatically from products.</p>
           {products.length === 0 ? <p className="muted">No products yet — Collection is empty.</p> : (
             <div className="showcase-admin-grid">
               {products.map((p) => (
@@ -224,7 +228,7 @@ export default function Admin() {
       {tab === 'Display' && (
         <div className="showcase-admin">
           <h2>Landing page gallery</h2>
-          <p className="muted">Photos uploaded here appear in the homepage accordion and the first three float in the hero. Products do not show here.</p>
+          <p className="muted">Photos uploaded here appear in the homepage accordion and the first three float in the hero.</p>
           <label className="showcase-slot" style={{ minHeight: 88 }}>
             <span>Add photos</span>
             <input type="file" accept="image/*" multiple onChange={async (e) => {
