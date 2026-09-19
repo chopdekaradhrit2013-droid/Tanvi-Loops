@@ -8,6 +8,14 @@ const COPY = {
   Cancelled: 'Your order has been cancelled. Write to us if this looks wrong.',
 }
 
+export function customerEmail(order) {
+  return String(order.email || order.customer?.email || '').trim()
+}
+
+export function statusSubject(order, status) {
+  return `Tanvi Loops order ${order.id} is ${status}`
+}
+
 export function statusEmailText(order, status) {
   const name = order.customer?.name || 'there'
   const note = COPY[status] || `Your order status is now ${status}.`
@@ -27,17 +35,17 @@ export function statusEmailText(order, status) {
   ].filter(Boolean).join('\n')
 }
 
-export function customerEmail(order) {
-  return String(order.email || order.customer?.email || '').trim()
+export function mailtoStatus(order, status) {
+  const to = customerEmail(order)
+  const subject = statusSubject(order, status)
+  const body = statusEmailText(order, status)
+  return `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }
 
 export function openStatusEmail(order, status) {
   const to = customerEmail(order)
   if (!to || !to.includes('@')) return { ok: false, error: 'No customer email on this order' }
-  const subject = `Tanvi Loops order ${order.id} is ${status}`
-  const body = statusEmailText(order, status)
-  const gmail = `https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-  window.open(gmail, '_blank', 'noopener,noreferrer')
+  window.location.href = mailtoStatus(order, status)
   return { ok: true, to }
 }
 
