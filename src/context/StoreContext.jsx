@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { PRODUCTS as SEED } from '../data/products'
 import { mapProduct, supabase, supabaseEnabled, toRow, uploadDataUrl } from '../lib/supabase'
+import { emailOrderStatus } from '../lib/statusEmail'
 
 const StoreContext = createContext(null)
 const KEY = 'tanvi-loops-store-v9'
@@ -179,8 +180,21 @@ export function StoreProvider({ children }) {
     return order
   }
   const updateOrderStatus = async (id, status) => {
+    const current = orders.find((o) => o.id === id)
+    const next = current ? { ...current, status } : null
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)))
     if (supabaseEnabled) await supabase.from('orders').update({ status }).eq('id', id)
+    if (next) {
+      try {
+        const sent = await emailOrderStatus(next, status)
+        if (sent.ok) notify(`Status updated. Email sent to ${sent.to}`)
+        else notify(sent.error || 'Status updated')
+      } catch {
+        notify('Status updated, but the email could not be sent yet')
+      }
+    } else {
+      notify('Status updated')
+    }
   }
   const upsertProduct = async (product) => {
     let nextProduct = { ...product }
