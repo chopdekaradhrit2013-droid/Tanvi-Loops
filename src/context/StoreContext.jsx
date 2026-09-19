@@ -3,13 +3,14 @@ import { PRODUCTS as SEED } from '../data/products'
 import { mapProduct, supabase, supabaseEnabled, toRow, uploadDataUrl } from '../lib/supabase'
 
 const StoreContext = createContext(null)
-const KEY = 'tanvi-loops-store-v8'
+const KEY = 'tanvi-loops-store-v9'
 const COLLECTION_BASE = 1000
 const ADMIN_EMAIL = 'cooltanwee@gmail.com'
+const ADMIN_PASSWORD = 'bobbokoyande17101997'
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY)
+    const raw = localStorage.getItem(KEY) || localStorage.getItem('tanvi-loops-store-v8')
     if (!raw) return null
     return JSON.parse(raw)
   } catch {
@@ -21,6 +22,11 @@ function asUser(u) {
   if (!u?.email) return null
   const email = String(u.email).trim().toLowerCase()
   return { name: u.name || '', email, isAdmin: email === ADMIN_EMAIL }
+}
+
+function withAdminPassword(list = []) {
+  const others = list.filter((u) => String(u.email || '').toLowerCase() !== ADMIN_EMAIL)
+  return [{ name: 'Tanvi', email: ADMIN_EMAIL, password: ADMIN_PASSWORD, isAdmin: true }, ...others]
 }
 
 async function persistSlots(urls, base) {
@@ -42,9 +48,7 @@ export function StoreProvider({ children }) {
   const [cart, setCart] = useState(saved?.cart || [])
   const [favourites, setFavourites] = useState(saved?.favourites || [])
   const [user, setUser] = useState(() => asUser(saved?.user))
-  const [users, setUsers] = useState(saved?.users || [
-    { name: 'Tanvi', email: ADMIN_EMAIL, password: 'admin123', isAdmin: true },
-  ])
+  const [users, setUsers] = useState(() => withAdminPassword(saved?.users))
   const [orders, setOrders] = useState(saved?.orders || [])
   const [toast, setToast] = useState(null)
   const [cloudReady, setCloudReady] = useState(false)
