@@ -1,5 +1,5 @@
 const FROM = 'cooltanwee@gmail.com'
-const WEBHOOK = import.meta.env.VITE_ORDER_WEBHOOK_URL || ''
+const WEBHOOK = import.meta.env.VITE_ORDER_WEBHOOK_URL || 'https://grok.com/webhook/automation/04a3fbc7-da6f-42c0-a8cb-91c3c50f56f1'
 
 export function customerEmail(order) {
   return String(order.email || order.customer?.email || '').trim()
@@ -22,9 +22,6 @@ export async function emailOrderStatus(order, status, event = 'status') {
   if (!payload.to || !payload.to.includes('@')) {
     return { ok: false, error: 'No customer email on this order' }
   }
-  if (!WEBHOOK) {
-    return { ok: false, error: 'Order email bot webhook is not connected yet' }
-  }
   const res = await fetch(WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -35,8 +32,4 @@ export async function emailOrderStatus(order, status, event = 'status') {
     return { ok: false, error: text || 'Bot did not accept the webhook' }
   }
   return { ok: true, to: payload.to }
-}
-
-export function openStatusEmail() {
-  return { ok: false, error: 'Use the connected mailer bot instead' }
 }
