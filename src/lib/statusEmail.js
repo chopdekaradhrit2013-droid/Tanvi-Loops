@@ -27,24 +27,20 @@ export function statusEmailText(order, status) {
   ].filter(Boolean).join('\n')
 }
 
-export async function emailOrderStatus(order, status) {
-  const to = String(order.email || order.customer?.email || '').trim()
+export function customerEmail(order) {
+  return String(order.email || order.customer?.email || '').trim()
+}
+
+export function openStatusEmail(order, status) {
+  const to = customerEmail(order)
   if (!to || !to.includes('@')) return { ok: false, error: 'No customer email on this order' }
-  const payload = {
-    name: 'Tanvi Loops',
-    email: FROM,
-    _replyto: FROM,
-    _subject: `Tanvi Loops order ${order.id} is ${status}`,
-    message: statusEmailText(order, status),
-  }
-  const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(text || 'Could not send status email')
-  }
+  const subject = `Tanvi Loops order ${order.id} is ${status}`
+  const body = statusEmailText(order, status)
+  const gmail = `https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+  window.open(gmail, '_blank', 'noopener,noreferrer')
   return { ok: true, to }
+}
+
+export async function emailOrderStatus(order, status) {
+  return openStatusEmail(order, status)
 }
