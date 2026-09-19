@@ -15,9 +15,14 @@ import Contact from './pages/Contact.jsx'
 import Admin from './pages/Admin.jsx'
 import { useStore } from './context/StoreContext.jsx'
 
+const ADMIN_EMAIL = 'cooltanwee@gmail.com'
+
 function AdminGate({ children }) {
   const { user } = useStore()
-  if (!user?.isAdmin) return <Navigate to="/signin" replace />
+  const email = String(user?.email || '').toLowerCase()
+  if (!user || email !== ADMIN_EMAIL || !user.isAdmin) {
+    return <Navigate to="/signin?next=/admin" replace />
+  }
   return children
 }
 

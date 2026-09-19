@@ -5,6 +5,7 @@ import { mapProduct, supabase, supabaseEnabled, toRow, uploadDataUrl } from '../
 const StoreContext = createContext(null)
 const KEY = 'tanvi-loops-store-v8'
 const COLLECTION_BASE = 1000
+const ADMIN_EMAIL = 'cooltanwee@gmail.com'
 
 function load() {
   try {
@@ -14,6 +15,12 @@ function load() {
   } catch {
     return null
   }
+}
+
+function asUser(u) {
+  if (!u?.email) return null
+  const email = String(u.email).trim().toLowerCase()
+  return { name: u.name || '', email, isAdmin: email === ADMIN_EMAIL }
 }
 
 async function persistSlots(urls, base) {
@@ -34,9 +41,9 @@ export function StoreProvider({ children }) {
   const [collection, setCollection] = useState(Array.isArray(saved?.collection) ? saved.collection.filter(Boolean) : [])
   const [cart, setCart] = useState(saved?.cart || [])
   const [favourites, setFavourites] = useState(saved?.favourites || [])
-  const [user, setUser] = useState(saved?.user || null)
+  const [user, setUser] = useState(() => asUser(saved?.user))
   const [users, setUsers] = useState(saved?.users || [
-    { name: 'Tanvi', email: 'cooltanwee@gmail.com', password: 'admin123', isAdmin: true },
+    { name: 'Tanvi', email: ADMIN_EMAIL, password: 'admin123', isAdmin: true },
   ])
   const [orders, setOrders] = useState(saved?.orders || [])
   const [toast, setToast] = useState(null)
@@ -134,15 +141,18 @@ export function StoreProvider({ children }) {
   const removeFromCart = (id, color) => setCart((prev) => prev.filter((x) => !(x.id === id && x.color === color)))
   const toggleFavourite = (id) => setFavourites((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
   const signUp = ({ name, email, password }) => {
-    if (users.some((u) => u.email === email)) return { ok: false, error: 'Email already registered' }
-    setUsers((u) => [...u, { name, email, password, isAdmin: false }])
-    setUser({ name, email, isAdmin: false })
+    const clean = String(email || '').trim().toLowerCase()
+    if (clean === ADMIN_EMAIL) return { ok: false, error: 'This email is reserved for the store admin.' }
+    if (users.some((u) => u.email === clean)) return { ok: false, error: 'Email already registered' }
+    setUsers((u) => [...u, { name, email: clean, password, isAdmin: false }])
+    setUser({ name, email: clean, isAdmin: false })
     return { ok: true }
   }
   const signIn = ({ email, password }) => {
-    const found = users.find((u) => u.email === email && u.password === password)
+    const clean = String(email || '').trim().toLowerCase()
+    const found = users.find((u) => String(u.email).toLowerCase() === clean && u.password === password)
     if (!found) return { ok: false, error: 'Invalid email or password' }
-    setUser({ name: found.name, email: found.email, isAdmin: !!found.isAdmin })
+    setUser(asUser(found))
     return { ok: true }
   }
   const signOut = () => setUser(null)
