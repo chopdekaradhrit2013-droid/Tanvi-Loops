@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CATEGORIES } from '../data/products.js'
 import { useStore } from '../context/StoreContext.jsx'
+import { openStatusEmail } from '../lib/statusEmail.js'
 
 const empty = {
   id: '', name: '', price: '', oldPrice: '', category: 'Plushies', materials: '', colors: '',
@@ -56,6 +57,9 @@ function OrderCard({ o, updateOrderStatus, open, onToggle }) {
                   {['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'].map((s) => <option key={s}>{s}</option>)}
                 </select>
               </label>
+              <button type="button" className="pill-btn dark" style={{ marginTop: 10 }} onClick={() => openStatusEmail(o, o.status)}>
+                Email customer
+              </button>
             </div>
           </div>
           <p className="eyebrow" style={{ marginTop: 16 }}>Items</p>
@@ -220,7 +224,7 @@ export default function Admin() {
       {tab === 'Orders' && (
         <div>
           <h2>Orders</h2>
-          <p className="muted">Tap an order to see the full address, phone, and items.</p>
+          <p className="muted">Tap an order for the address. Change status or tap Email customer — Gmail opens with the note ready to send from cooltanwee@gmail.com.</p>
           {orderList}
         </div>
       )}
