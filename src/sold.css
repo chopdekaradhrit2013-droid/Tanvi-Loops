@@ -24,3 +24,10 @@ button:disabled,
   cursor: not-allowed;
   transform: none;
 }
+.cod-box {
+  background: #fff8ef;
+  border: 1px solid #ead9a8;
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.cod-box p { margin: 6px 0 0; }
