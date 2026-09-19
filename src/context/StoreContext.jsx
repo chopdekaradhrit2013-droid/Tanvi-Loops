@@ -177,6 +177,7 @@ export function StoreProvider({ children }) {
         subtotal: order.subtotal, shipping: order.shipping, total: order.total, email: order.email,
       })
     }
+    try { await emailOrderStatus(order, 'Pending', 'placed') } catch { /* bot optional until webhook is set */ }
     return order
   }
   const updateOrderStatus = async (id, status) => {
@@ -186,11 +187,11 @@ export function StoreProvider({ children }) {
     if (supabaseEnabled) await supabase.from('orders').update({ status }).eq('id', id)
     if (next) {
       try {
-        const sent = await emailOrderStatus(next, status)
-        if (sent.ok) notify(`Status updated. Email sent to ${sent.to}`)
+        const sent = await emailOrderStatus(next, status, 'status')
+        if (sent.ok) notify(`Status updated. Email bot notified ${sent.to}`)
         else notify(sent.error || 'Status updated')
       } catch {
-        notify('Status updated, but the email could not be sent yet')
+        notify('Status updated, but the email bot is not connected yet')
       }
     } else {
       notify('Status updated')
