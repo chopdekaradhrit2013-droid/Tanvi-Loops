@@ -1,0 +1,56 @@
+.swipe {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+  user-select: none;
+  background: #efe6d8;
+}
+.swipe img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+.swipe-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,248,239,.92);
+  color: #2b241c;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 3;
+}
+.swipe-btn.prev { left: 8px; }
+.swipe-btn.next { right: 8px; }
+.swipe-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 3;
+}
+.swipe-dots button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.55);
+  cursor: pointer;
+}
+.swipe-dots button.on { background: #fff; width: 16px; border-radius: 99px; }
+.gallery-main .swipe { aspect-ratio: 1; border-radius: 28px; }
+.card-media .swipe, .chroma-img-wrapper .swipe { position: absolute; inset: 0; background: transparent; }
+.chroma-img-wrapper { position: relative; }

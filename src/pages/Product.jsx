@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../context/StoreContext.jsx'
 import Price from '../components/Price.jsx'
+import ImageSwipe from '../components/ImageSwipe.jsx'
 
 export default function Product() {
   const { id } = useParams()
@@ -9,24 +10,16 @@ export default function Product() {
   const product = products.find((p) => p.id === id)
   const [qty, setQty] = useState(1)
   const [color, setColor] = useState(product?.colors?.[0])
-  const [shot, setShot] = useState(0)
   const nav = useNavigate()
   if (!product) return <section className="page"><p>Piece not found.</p></section>
   const soldOut = product.soldOut || product.stock <= 0
+  const images = product.images?.length ? product.images : []
   return (
     <section className="page product-layout">
       <div>
         <div className="gallery-main" style={{ position: 'relative' }}>
-          <img src={product.images[shot] || product.images[0]} alt={product.name} />
-          {soldOut && <span className="sold-badge">Sold out</span>}
+          <ImageSwipe images={images} alt={product.name} soldOut={soldOut} />
         </div>
-        {product.images.length > 1 && (
-          <div className="thumbs">
-            {product.images.map((src, i) => (
-              <img key={src + i} src={src} className={i === shot ? 'on' : ''} onClick={() => setShot(i)} alt="" />
-            ))}
-          </div>
-        )}
       </div>
       <div>
         <p className="kicker" style={{ fontSize: 28 }}>{product.category}</p>
@@ -36,7 +29,7 @@ export default function Product() {
         <p>{product.description}</p>
         <p className="muted">{product.materials}</p>
         <div className="row" style={{ justifyContent: 'flex-start', margin: '12px 0' }}>
-          {product.colors.map((c) => (
+          {(product.colors || []).map((c) => (
             <button key={c} className={'swatch' + (color === c ? ' on' : '')} title={c} onClick={() => setColor(c)} style={{ background: '#efe6d8' }} />
           ))}
           <span className="muted">{color}</span>

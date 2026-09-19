@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
+import ImageSwipe from './ImageSwipe.jsx'
 import './ChromaGrid.css'
 
 export default function ChromaGrid({
@@ -71,7 +72,6 @@ export default function ChromaGrid({
           key={c.id || i}
           className="chroma-card"
           onMouseMove={handleCardMove}
-          onClick={() => onItemClick ? onItemClick(c) : c.url && window.open(c.url, '_blank', 'noopener,noreferrer')}
           style={{
             '--card-border': c.borderColor || 'transparent',
             '--card-gradient': c.gradient,
@@ -79,9 +79,14 @@ export default function ChromaGrid({
           }}
         >
           <div className="chroma-img-wrapper">
-            <img src={c.image} alt={c.title} loading="lazy" />
+            <ImageSwipe
+              images={c.images?.length ? c.images : [c.image]}
+              alt={c.title}
+              soldOut={c.soldOut}
+              onOpen={() => onItemClick ? onItemClick(c) : c.url && window.open(c.url, '_blank', 'noopener,noreferrer')}
+            />
           </div>
-          <footer className="chroma-info">
+          <footer className="chroma-info" onClick={() => onItemClick?.(c)}>
             <h3 className="name">{c.title}</h3>
             {c.handle && <span className={'handle' + (c.soldOut ? ' sold' : '')}>{c.handle}</span>}
             <p className="role">{c.subtitle}</p>

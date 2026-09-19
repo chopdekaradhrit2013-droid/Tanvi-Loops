@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../context/StoreContext.jsx'
 import Price from './Price.jsx'
+import ImageSwipe from './ImageSwipe.jsx'
 
 export default function ProductCard({ product }) {
   const nav = useNavigate()
@@ -9,9 +10,13 @@ export default function ProductCard({ product }) {
   const soldOut = product.soldOut || product.stock <= 0
   return (
     <article className="card studio-card">
-      <div className="card-media" onClick={() => nav(`/product/${product.id}`)}>
-        <img src={product.images[0]} alt={product.name} />
-        {soldOut && <span className="sold-badge">Sold out</span>}
+      <div className="card-media">
+        <ImageSwipe
+          images={product.images}
+          alt={product.name}
+          soldOut={soldOut}
+          onOpen={() => nav(`/product/${product.id}`)}
+        />
         <button className="heart" onClick={(e) => { e.stopPropagation(); toggleFavourite(product.id) }} aria-label="Favourite">{loved ? '♥' : '♡'}</button>
       </div>
       <div className="card-body">

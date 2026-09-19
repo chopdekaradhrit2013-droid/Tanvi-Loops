@@ -25,6 +25,7 @@ export default function Home() {
     const accent = ACCENTS[i % ACCENTS.length]
     return {
       id: p.id,
+      images: p.images || [],
       image: p.images?.[0],
       title: p.name,
       subtitle: p.oldPrice > p.price ? `₹${p.price}  ·  was ₹${p.oldPrice}` : `₹${Number(p.price).toLocaleString('en-IN')}`,
